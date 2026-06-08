@@ -20,11 +20,11 @@
       <form class="login-form" action="/login" method="POST">
         <div class="field">
           <label for="login-email">E-mail</label>
-          <input type="email" id="login-email" name="email" autocomplete="off" placeholder="vous@exemple.com">
+          <input type="email" id="login-email" name="email" autocomplete="off" placeholder="vous@exemple.com" required>
         </div>
         <div class="field">
           <label for="login-password">Password</label>
-          <input type="password" id="login-password" name="password" autocomplete="off" placeholder="••••••••">
+          <input type="password" id="login-password" name="password" autocomplete="off" placeholder="••••••••" required>
         </div>
         <button type="submit" class="btn btn-primary">Login</button>
       </form>
@@ -41,15 +41,15 @@
       <form class="login-form" action="/register" method="POST">
         <div class="field">
           <label for="reg-username">Username</label>
-          <input type="text" id="reg-username" name="username" autocomplete="off" placeholder="Username">
+          <input type="text" id="reg-username" name="username" autocomplete="off" placeholder="Username" required>
         </div>
         <div class="field">
           <label for="reg-email">E-mail</label>
-          <input type="email" id="reg-email" name="email" autocomplete="off" placeholder="vous@exemple.com">
+          <input type="email" id="reg-email" name="email" autocomplete="off" placeholder="vous@exemple.com" required>
         </div>
         <div class="field">
           <label for="reg-password">Password</label>
-          <input type="password" id="reg-password" name="password" autocomplete="off" placeholder="••••••••">
+          <input type="password" id="reg-password" name="password" autocomplete="off" placeholder="••••••••" required>
         </div>
         <button type="submit" class="btn">Register</button>
       </form>

@@ -17,7 +17,6 @@ def login_required(f):
     """
     From cs50 finance project
     """
-
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if session.get("user_id") is None:
@@ -34,6 +33,8 @@ def index():
 @app.route("/login", methods=["GET", "POST"])
 def login():
 	if request.method == "GET" :
+		if session.get('username',False) :
+			return redirect("/")
 		return render_template("login.html")
 	if request.method == "POST" :
 		email = request.form.get("email")
