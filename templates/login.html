@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}
+	Login
+{% endblock %}
+
+{% block head %}
+	<link rel="stylesheet" href="{{ url_for('static', filename='CSS/login.css')}}">
+{% endblock %}
+
+{% block content %}
+	<main class="login-page">
+  <div class="login-split">
+
+    <!-- Connexion -->
+    <div class="login-panel">
+      <h2 class="login-title">Login</h2>
+      <p class="login-sub">Glad to see you again.</p>
+
+      <form class="login-form" action="/login" method="POST">
+        <div class="field">
+          <label for="login-email">E-mail</label>
+          <input type="email" id="login-email" name="email" autocomplete="off" placeholder="vous@exemple.com">
+        </div>
+        <div class="field">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" name="password" autocomplete="off" placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn btn-primary">Login</button>
+      </form>
+    </div>
+
+    <!-- Séparateur -->
+    <div class="login-divider"></div>
+
+    <!-- Inscription -->
+    <div class="login-panel">
+      <h2 class="login-title">Create an account</h2>
+      <p class="login-sub">Join us easily !</p>
+
+      <form class="login-form" action="/register" method="POST">
+        <div class="field">
+          <label for="reg-username">Username</label>
+          <input type="text" id="reg-username" name="username" autocomplete="off" placeholder="Username">
+        </div>
+        <div class="field">
+          <label for="reg-email">E-mail</label>
+          <input type="email" id="reg-email" name="email" autocomplete="off" placeholder="vous@exemple.com">
+        </div>
+        <div class="field">
+          <label for="reg-password">Password</label>
+          <input type="password" id="reg-password" name="password" autocomplete="off" placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn">Register</button>
+      </form>
+    </div>
+
+  </div>
+</main>
+{% endblock %}
