@@ -1,17 +1,16 @@
 from flask import Flask, render_template, request, redirect, session
-from flask_socketio import join_room, leave_room, send, SocketIO
+from extensions import socketio
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
+import fsocket
 
 from random import randint
 
 from functools import wraps
 
-# Is this my new branch ? 
-
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "SuperSecretKeyOMG"
-socketio = SocketIO(app)
+socketio.init_app(app)
 
 db = sqlite3.connect("fantasy.db", check_same_thread=False)
 cursor = db.cursor()
@@ -136,3 +135,6 @@ def create_room_sequence(nb_letter):
 		room_sequence += chr(ord('A') + randint(0,25))
 
 	return room_sequence
+
+if __name__ == "__main__" :
+	socketio.run(app)
