@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}
+	Join
+{% endblock %}
+
+{% block content %}
+	Let's choose your room !
+	<form action="join" method="POST">
+		<input type="text" placeholder="Select a room !">
+		<button type="submit">Join !</button>
+	</form>
+
+	<form action="create_room" method="POST">
+		<button type="submit">Create a room</button>
+	</form>
+{% endblock %}

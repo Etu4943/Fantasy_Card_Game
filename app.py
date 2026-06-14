@@ -3,6 +3,8 @@ from flask_socketio import join_room, leave_room, send, SocketIO
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 
+from random import randint
+
 from functools import wraps
 
 
@@ -12,6 +14,11 @@ socketio = SocketIO(app)
 
 db = sqlite3.connect("fantasy.db", check_same_thread=False)
 cursor = db.cursor()
+
+ROOMS = dict()
+
+NB_LETTERS_ROOM_SEQUENCE = 4
+
 
 def login_required(f):
     """
@@ -70,3 +77,35 @@ def register():
 def logout():
 	session.clear()
 	return redirect("/login")
+
+@app.route("/game", methods=["POST", "GET"])
+@login_required
+def game():
+	return render_template("game.html")
+
+@app.route("/chat", methods=["POST", "GET"])
+@login_required
+def chat():
+	return render_template("chat.html")
+
+@app.route("/join", methods=["POST", "GET"])
+@login_required
+def join():
+	if request.method == "GET" :
+		return render_template("join.html")
+	elif request.method == "POST" :
+		return render_template("temp.html", message="OK, so the post method works so far !")
+
+@app.route("/create_room", methods=["POST"])
+@login_required
+def create_room():
+	room_sequence = create_room_sequence(NB_LETTERS_ROOM_SEQUENCE)
+	return render_template("temp.html", message=room_sequence)
+
+
+def create_room_sequence(nb_letter):
+	room_sequence = ""
+	for _ in range(nb_letter) :
+		room_sequence += chr(ord('A') + randint(0,26))
+
+	return room_sequence
