@@ -7,6 +7,7 @@ from random import randint
 
 from functools import wraps
 
+# Is this my new branch ? 
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "SuperSecretKeyOMG"
@@ -123,7 +124,7 @@ def quit_room():
 	session.pop("room", None)
 	ROOMS[session_room]['nb_players'] -= 1
 
-	if ROOMS[session_room]['nb_player'] == 0 :
+	if ROOMS[session_room]['nb_players'] == 0 :
 		print("NO MORE PLAYER IN THIS ROOM, LETS NUKE IT")
 		del ROOMS[session_room]
 	return redirect("/join")
