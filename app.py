@@ -18,6 +18,7 @@ cursor = db.cursor()
 ROOMS = dict()
 
 NB_LETTERS_ROOM_SEQUENCE = 4
+MAX_PLAYERS = 2
 
 
 def login_required(f):
@@ -94,18 +95,43 @@ def join():
 	if request.method == "GET" :
 		return render_template("join.html")
 	elif request.method == "POST" :
-		return render_template("temp.html", message="OK, so the post method works so far !")
+		room_sequence = request.form.get("room_sequence")
+		if room_sequence not in ROOMS.keys() :
+			return render_template("error.html", err=f"This room doesn't exists yet !")
+		elif ROOMS[room_sequence]['nb_players'] == MAX_PLAYERS :
+			return render_template("error.html", err=f"This room is already full !")
+		else :
+			return join_room(room_sequence)
 
 @app.route("/create_room", methods=["POST"])
 @login_required
 def create_room():
 	room_sequence = create_room_sequence(NB_LETTERS_ROOM_SEQUENCE)
+	ROOMS[room_sequence] = {}
+	ROOMS[room_sequence]['nb_players'] = 0
+	return join_room(room_sequence)
+
+def join_room(room_sequence):
+	ROOMS[room_sequence]['nb_players'] += 1
+	session['room'] = room_sequence
 	return render_template("temp.html", message=room_sequence)
+
+@app.route("/quit_room")
+@login_required
+def quit_room():
+	session_room = session.get('room')
+	session.pop("room", None)
+	ROOMS[session_room]['nb_players'] -= 1
+
+	if ROOMS[session_room]['nb_player'] == 0 :
+		print("NO MORE PLAYER IN THIS ROOM, LETS NUKE IT")
+		del ROOMS[session_room]
+	return redirect("/join")
 
 
 def create_room_sequence(nb_letter):
 	room_sequence = ""
 	for _ in range(nb_letter) :
-		room_sequence += chr(ord('A') + randint(0,26))
+		room_sequence += chr(ord('A') + randint(0,25))
 
 	return room_sequence

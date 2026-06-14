@@ -15,12 +15,16 @@
 			<nav class="navbar">
 			    <a href="/" class="nav-logo">
 			      <span class="nav-logo-dot"></span>
-			      Fantasy {% if session[code] %}[{{ session[code] }}] {% endif %}
+			      Fantasy {% if session['room'] %}[{{ session['room'] }}] {% endif %}
 			    </a>
 
 			    <ul class="nav-links">
 			      <li><a href="/game" class="nav-link {% if request.path == '/game' %}active{% endif %}">Game</a></li>
-			      <li><a href="/join" class="nav-link {% if request.path == '/join' %}active{% endif %}">Join</a></li>
+			      {% if session['room'] %}
+			      	<li><a href="/quit_room" class="nav-link">Quit</a></li>
+			      {% else %}
+			      	<li><a href="/join" class="nav-link {% if request.path == '/join' %}active{% endif %}">Join</a></li>
+			      {% endif %}
 			      <li><a href="/chat" class="nav-link {% if request.path == '/chat' %}active{% endif %}">Chat</a></li>
 
 			    </ul>
