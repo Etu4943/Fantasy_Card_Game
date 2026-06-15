@@ -18,6 +18,10 @@
 		    window.location.href = '/quit_room';
 		});
 
+		socket.on('new_player', (data) => {
+			alert(data.message)
+		})
+
 		document.addEventListener('DOMContentLoaded', () => {
 		    document.getElementById('quit-btn').addEventListener('click', () => {
 		    	console.log("Try to leave !")

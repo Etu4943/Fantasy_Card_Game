@@ -17,7 +17,7 @@ def handle_join(data):
 
     ROOMS[room_code]["players"].add(user_id)
     sid_to_room[request.sid] = (room_code, user_id)
-
+    socketio.emit('new_player', {'message':'A new player has entered the game !'}, room=room_code, include_self=False)
     print('A user has enter the game !')
 
 @socketio.on('disconnect')
