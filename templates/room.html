@@ -5,6 +5,7 @@
 {% endblock %}
 
 {% block head %}
+	<link rel="stylesheet" href="{{ url_for('static', filename='CSS/chat.css')}}">
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 	<script>
 	    var socket = io();
@@ -30,36 +31,58 @@
 			let span_message = document.createElement("span")
 
 
-			span_username.innerHTML = data['user']
+			span_username.textContent = data['user']
 			span_username.classList.add('username')
 
-			span_message.innerHTML = data['message']
+			span_message.textContent = data['message']
 			span_message.classList.add('msg-content')
 
 			new_node.appendChild(span_username)
 			new_node.appendChild(span_message)
 
 			com_box.appendChild(new_node)
+
+			com_box.scrollTop = com_box.scrollHeight
 		})
+
+		function send_message(){
+			let msg_input = document.getElementById("msg");
+			let msg_content = msg_input.value;
+			msg_input.value = "";
+			socket.emit('send_message', {'message': msg_content});
+		}
 
 		document.addEventListener('DOMContentLoaded', () => {
 		    document.getElementById('quit-btn').addEventListener('click', () => {
 			    socket.emit('leave');
 			});
 
+			
+
+			document.getElementById('chat-toggle').addEventListener('click', () => {
+			    document.getElementById('chat-panel').classList.toggle('open');
+			});
+
 			document.getElementById('msg-btn').addEventListener('click', () => {
-				let msg_content = document.getElementById("msg").value
-			    socket.emit('send_message', {'message': msg_content});
+				send_message();
+			});
+
+			document.getElementById('msg').addEventListener('keydown', (e) => {
+			    if (e.key === 'Enter') {
+			        send_message();
+			    }
 			});
 		});
 	</script>
 {% endblock %}
 
 {% block content %}
-	<input type=text id="msg" placeholder="Message ..." autocomplete='off'>
-	<button id="msg-btn">Send</button>
-
-	<div id="com-box">
-
+	<div id="chat-panel">
+	    <button id="chat-toggle">Chat</button>
+	    <div id="com-box"></div>
+	    <div class="chat-input">
+	        <input type="text" id="msg" placeholder="Message ..." autocomplete="off">
+	        <button id="msg-btn" type="submit">Send</button>
+	    </div>
 	</div>
 {% endblock %}
