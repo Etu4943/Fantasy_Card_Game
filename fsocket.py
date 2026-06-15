@@ -29,7 +29,7 @@ def handle_leave():
     room_code = remove_player(request.sid)
     if room_code:
         #socketio.emit('message', {'message':f'{session.get("username")} has quit the game !'}, room=room_code, include_self=False)
-        diffuse_message({'message' : "has left the chat"})
+        diffuse_message({'message' : "has left the chat"}, room_code)
         leave_room(room_code)  
     emit('left_room')
 
@@ -54,10 +54,10 @@ def remove_player(sid):
 def handle_send_message(data):
     diffuse_message(data)
 
-def diffuse_message(data):
+def diffuse_message(data, def_room_code=None):
     entry = sid_to_room.get(request.sid, None)
     if entry is None :
-        return
-
-    room_code, user_id = entry
+        room_code = def_room_code
+    else :
+        room_code, user_id = entry
     emit('recieve_message', {'user': session.get('username'),'message' : data['message']}, room=room_code)
