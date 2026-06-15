@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}
+	Room
+{% endblock %}
+
+{% block head %}
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+	<script>
+	    var socket = io();
+	    socket.on('connect', () => {
+	        socket.emit('join', { room_code: "{{ room_code }}" });
+	    });
+
+	    
+
+		socket.on('left_room', () => {
+		    window.location.href = '/quit_room';
+		});
+
+		document.addEventListener('DOMContentLoaded', () => {
+		    document.getElementById('quit-btn').addEventListener('click', () => {
+		    	console.log("Try to leave !")
+			    socket.emit('leave');
+			});
+		});
+	</script>
+{% endblock %}
+
+{% block content %}
+	Content of room !
+{% endblock %}

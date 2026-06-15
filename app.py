@@ -1,8 +1,10 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, url_for
 from extensions import socketio
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 import fsocket
+
+from state import ROOMS
 
 from random import randint
 
@@ -15,9 +17,8 @@ socketio.init_app(app)
 db = sqlite3.connect("fantasy.db", check_same_thread=False)
 cursor = db.cursor()
 
-ROOMS = dict()
 
-NB_LETTERS_ROOM_SEQUENCE = 4
+NB_LETTERS_ROOM_SEQUENCE = 5
 MAX_PLAYERS = 2
 
 
@@ -79,6 +80,11 @@ def logout():
 	session.clear()
 	return redirect("/login")
 
+@app.route('/room/<room_code>')
+@login_required
+def room(room_code):
+	return render_template("room.html", room_code=room_code)
+
 @app.route("/game", methods=["POST", "GET"])
 @login_required
 def game():
@@ -98,34 +104,26 @@ def join():
 		room_sequence = request.form.get("room_sequence")
 		if room_sequence not in ROOMS.keys() :
 			return render_template("error.html", err=f"This room doesn't exists yet !")
-		elif ROOMS[room_sequence]['nb_players'] == MAX_PLAYERS :
+		elif len(ROOMS[room_sequence]['players']) == MAX_PLAYERS :
 			return render_template("error.html", err=f"This room is already full !")
 		else :
-			return join_room(room_sequence)
+			return join_a_room(room_sequence)
 
 @app.route("/create_room", methods=["POST"])
 @login_required
 def create_room():
 	room_sequence = create_room_sequence(NB_LETTERS_ROOM_SEQUENCE)
-	ROOMS[room_sequence] = {}
-	ROOMS[room_sequence]['nb_players'] = 0
-	return join_room(room_sequence)
+	ROOMS[room_sequence] = {'players' : set()}
+	return join_a_room(room_sequence)
 
-def join_room(room_sequence):
-	ROOMS[room_sequence]['nb_players'] += 1
+def join_a_room(room_sequence): # join_room is in socketio
 	session['room'] = room_sequence
-	return render_template("temp.html", message=room_sequence)
+	return redirect(url_for('room', room_code=room_sequence))
 
 @app.route("/quit_room")
 @login_required
 def quit_room():
-	session_room = session.get('room')
 	session.pop("room", None)
-	ROOMS[session_room]['nb_players'] -= 1
-
-	if ROOMS[session_room]['nb_players'] == 0 :
-		print("NO MORE PLAYER IN THIS ROOM, LETS NUKE IT")
-		del ROOMS[session_room]
 	return redirect("/join")
 
 

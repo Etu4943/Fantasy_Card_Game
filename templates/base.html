@@ -21,7 +21,7 @@
 			    <ul class="nav-links">
 			      <li><a href="/game" class="nav-link {% if request.path == '/game' %}active{% endif %}">Game</a></li>
 			      {% if session['room'] %}
-			      	<li><a href="/quit_room" class="nav-link">Quit</a></li>
+			      	<li><a id="quit-btn" href="#" class="nav-link">Quit</a></li>
 			      {% else %}
 			      	<li><a href="/join" class="nav-link {% if request.path == '/join' %}active{% endif %}">Join</a></li>
 			      {% endif %}
