@@ -17,8 +17,8 @@ def handle_join(data):
 
     ROOMS[room_code]["players"].add(user_id)
     sid_to_room[request.sid] = (room_code, user_id)
-    socketio.emit('new_player', {'message':'A new player has entered the game !'}, room=room_code, include_self=False)
-    print('A user has enter the game !')
+    #socketio.emit('message', {'message':f'{session.get("username")} has entered the game !'}, room=room_code, include_self=False)
+    diffuse_message({'message' : "has enter the chat"})
 
 @socketio.on('disconnect')
 def handle_disconnect():
@@ -28,7 +28,9 @@ def handle_disconnect():
 def handle_leave():
     room_code = remove_player(request.sid)
     if room_code:
-        leave_room(room_code)  # désabonne ce socket du canal de diffusion
+        #socketio.emit('message', {'message':f'{session.get("username")} has quit the game !'}, room=room_code, include_self=False)
+        diffuse_message({'message' : "has left the chat"})
+        leave_room(room_code)  
     emit('left_room')
 
 
@@ -47,3 +49,15 @@ def remove_player(sid):
 
 
     return room_code
+
+@socketio.on('send_message')
+def handle_send_message(data):
+    diffuse_message(data)
+
+def diffuse_message(data):
+    entry = sid_to_room.get(request.sid, None)
+    if entry is None :
+        return
+
+    room_code, user_id = entry
+    emit('recieve_message', {'user': session.get('username'),'message' : data['message']}, room=room_code)

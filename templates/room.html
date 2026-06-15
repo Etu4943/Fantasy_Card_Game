@@ -18,19 +18,48 @@
 		    window.location.href = '/quit_room';
 		});
 
-		socket.on('new_player', (data) => {
+		socket.on('message', (data) => {
 			alert(data.message)
+		})
+
+		socket.on('recieve_message', (data) => {
+			let com_box = document.getElementById("com-box");
+			let new_node = document.createElement("div")
+
+			let span_username = document.createElement("span")
+			let span_message = document.createElement("span")
+
+
+			span_username.innerHTML = data['user']
+			span_username.classList.add('username')
+
+			span_message.innerHTML = data['message']
+			span_message.classList.add('msg-content')
+
+			new_node.appendChild(span_username)
+			new_node.appendChild(span_message)
+
+			com_box.appendChild(new_node)
 		})
 
 		document.addEventListener('DOMContentLoaded', () => {
 		    document.getElementById('quit-btn').addEventListener('click', () => {
-		    	console.log("Try to leave !")
 			    socket.emit('leave');
+			});
+
+			document.getElementById('msg-btn').addEventListener('click', () => {
+				let msg_content = document.getElementById("msg").value
+			    socket.emit('send_message', {'message': msg_content});
 			});
 		});
 	</script>
 {% endblock %}
 
 {% block content %}
-	Content of room !
+	<input type=text id="msg" placeholder="Message ..." autocomplete='off'>
+	<button id="msg-btn">Send</button>
+
+	<div id="com-box">
+
+	</div>
 {% endblock %}

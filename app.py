@@ -83,6 +83,7 @@ def logout():
 @app.route('/room/<room_code>')
 @login_required
 def room(room_code):
+	session['room'] = room_code
 	return render_template("room.html", room_code=room_code)
 
 @app.route("/game", methods=["POST", "GET"])
@@ -113,11 +114,10 @@ def join():
 @login_required
 def create_room():
 	room_sequence = create_room_sequence(NB_LETTERS_ROOM_SEQUENCE)
-	ROOMS[room_sequence] = {'players' : set()}
+	ROOMS[room_sequence] = {'players' : set(), 'messages' : []}
 	return join_a_room(room_sequence)
 
 def join_a_room(room_sequence): # join_room is in socketio
-	session['room'] = room_sequence
 	return redirect(url_for('room', room_code=room_sequence))
 
 @app.route("/quit_room")
