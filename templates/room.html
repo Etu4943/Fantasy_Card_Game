@@ -73,6 +73,10 @@
 
 		});
 
+		socket.on("empty_deck", () => {
+			document.getElementById("draw").remove()
+		});
+
 		document.addEventListener('DOMContentLoaded', () => {
 		    document.getElementById('quit-btn').addEventListener('click', () => {
 			    socket.emit('leave');

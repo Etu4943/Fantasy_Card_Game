@@ -91,6 +91,8 @@ def handle_draw_a_card():
     room_code, user_id = (session.get("room"), session.get("user_id"))
     add_card_to_hand(room_code, user_id)
     draw_card(room_code, user_id)
+    if len(deck[room_code]) == 0 :
+        emit("empty_deck", room=room_code)
 
 
 def draw_card(room_code, user_id):
