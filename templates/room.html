@@ -63,7 +63,11 @@
 		    for (card of hand) {
 		    	let new_node = document.createElement("div");
 		    	new_node.classList.add("card");
+		    	new_node.style.backgroundImage = `url('/static/Assets/Cards/${card.name}.png')`;
+		    	new_node.style.backgroundSize = "cover";
+		    	new_node.style.backgroundColor = "transparent";
 		    	hand_div.appendChild(new_node);
+
 		    }
 		    	
 

@@ -18,3 +18,5 @@ hand = dict()
 """
 
 cards = dict()
+
+deck = dict()

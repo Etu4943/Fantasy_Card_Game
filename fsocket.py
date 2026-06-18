@@ -1,10 +1,11 @@
 from extensions import socketio
-from state import ROOMS, sid_to_room, hand
+from state import ROOMS, sid_to_room, hand, deck
 
 from flask import request, session
 from flask_socketio import join_room, leave_room, send, SocketIO, emit
 
-from game import init_hand
+from game import init_hand, add_card_to_hand, init_deck
+from card import Card
 
 @socketio.on('message')
 def handle_message(data):
@@ -24,6 +25,9 @@ def handle_join(data):
     
     hand[room_code] = dict()
     hand[room_code][user_id] = []
+    
+    if room_code not in deck.keys() :
+        init_deck(room_code)
     init_hand(room_code, user_id)
     #socketio.emit('message', {'message':f'{session.get("username")} has entered the game !'}, room=room_code, include_self=False)
     diffuse_message({'message' : "has enter the chat"})
@@ -83,12 +87,11 @@ def diffuse_hand():
 
 @socketio.on("draw_a_card")
 def handle_draw_a_card():
-    entry = sid_to_room.get(request.sid, None)
-    room_code, user_id = entry
 
+    room_code, user_id = (session.get("room"), session.get("user_id"))
+    add_card_to_hand(room_code, user_id)
     draw_card(room_code, user_id)
 
 
 def draw_card(room_code, user_id):
-    hand[room_code][user_id].append("c4")
     diffuse_hand()
