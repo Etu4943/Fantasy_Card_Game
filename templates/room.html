@@ -43,6 +43,10 @@
 			com_box.appendChild(new_node)
 
 			com_box.scrollTop = com_box.scrollHeight
+
+			if (!document.getElementById('chat-panel').classList.contains('open')){
+				document.getElementById('chat-badge').classList.add("visible")
+			};
 		})
 
 		function send_message(){
@@ -66,6 +70,9 @@
 
 			document.getElementById('chat-toggle').addEventListener('click', () => {
 			    document.getElementById('chat-panel').classList.toggle('open');
+			    if (document.getElementById('chat-panel').classList.contains('open')){
+					document.getElementById('chat-badge').classList.remove("visible")
+				};
 			});
 
 			document.getElementById('msg-btn').addEventListener('click', () => {
@@ -89,7 +96,10 @@
 		Display card
 	</div>
 	<div id="chat-panel">
-	    <button id="chat-toggle">Chat</button>
+	    <button id="chat-toggle">
+	    	Chat
+	    	<span id="chat-badge" class="badge"></span>
+	    </button>
 	    <div id="com-box"></div>
 	    <div class="chat-input">
 	        <input type="text" id="msg" placeholder="Message ..." autocomplete="off">

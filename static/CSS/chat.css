@@ -92,3 +92,19 @@
 .msg-content {
     color: #f0f0f0;
 }
+
+.badge {
+    display: none;
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #B82304;
+    box-shadow: 0 0 0 2px #1e1e2e;
+}
+
+.badge.visible {
+    display: block;
+}
