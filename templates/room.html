@@ -52,6 +52,11 @@
 			socket.emit('send_message', {'message': msg_content});
 		}
 
+		socket.on('hand', (hand) => {
+		    console.log(hand); // ta main reçue du serveur
+		    // mets à jour ton affichage ici
+		});
+
 		document.addEventListener('DOMContentLoaded', () => {
 		    document.getElementById('quit-btn').addEventListener('click', () => {
 			    socket.emit('leave');
@@ -72,12 +77,17 @@
 			        send_message();
 			    }
 			});
+
+			socket.emit("ask_hand");
 		});
 	</script>
 {% endblock %}
 
 {% block content %}
-	Hey, let's try a new branch
+
+	<div>
+		Display card
+	</div>
 	<div id="chat-panel">
 	    <button id="chat-toggle">Chat</button>
 	    <div id="com-box"></div>

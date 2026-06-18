@@ -1,8 +1,10 @@
 from extensions import socketio
-from state import ROOMS, sid_to_room
+from state import ROOMS, sid_to_room, hand
 
 from flask import request, session
 from flask_socketio import join_room, leave_room, send, SocketIO, emit
+
+from game import init_hand
 
 @socketio.on('message')
 def handle_message(data):
@@ -17,6 +19,11 @@ def handle_join(data):
 
     ROOMS[room_code]["players"].add(user_id)
     sid_to_room[request.sid] = (room_code, user_id)
+
+    # Quand tu rejoins une partie, il faut lui créer et lui attribuer une main
+    hand[room_code] = dict()
+    hand[room_code][user_id] = []
+    init_hand(room_code, user_id)
     #socketio.emit('message', {'message':f'{session.get("username")} has entered the game !'}, room=room_code, include_self=False)
     diffuse_message({'message' : "has enter the chat"})
 
@@ -57,7 +64,18 @@ def handle_send_message(data):
 def diffuse_message(data, def_room_code=None):
     entry = sid_to_room.get(request.sid, None)
     if entry is None :
-        room_code = def_room_code
+        room_code = def_room_code # Au cas où le message vient du fait qu'il est parti, on peut plus récupérer entry
     else :
         room_code, user_id = entry
     emit('recieve_message', {'user': session.get('username'),'message' : data['message']}, room=room_code)
+
+@socketio.on("ask_hand")
+def handle_ask_hand():
+    diffuse_hand()
+
+def diffuse_hand():
+    entry = sid_to_room.get(request.sid, None)
+    room_code, user_id = entry
+
+    emit("hand", hand[room_code][user_id], to=request.sid) # Envoit uniquement les cartes au joueur concerné
+    # J'enverrai le nombre de carte uniquement à l'autre joueur.
