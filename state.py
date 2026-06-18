@@ -1,6 +1,7 @@
 ROOMS = dict()
 
 sid_to_room = dict()
+user_to_sid = dict()
 
 hand = dict()
 """"
@@ -15,3 +16,5 @@ hand = dict()
 		}
 	}
 """
+
+cards = dict()

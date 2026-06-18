@@ -21,6 +21,7 @@ def handle_join(data):
     sid_to_room[request.sid] = (room_code, user_id)
 
     # Quand tu rejoins une partie, il faut lui créer et lui attribuer une main
+    
     hand[room_code] = dict()
     hand[room_code][user_id] = []
     init_hand(room_code, user_id)
@@ -79,3 +80,15 @@ def diffuse_hand():
 
     emit("hand", hand[room_code][user_id], to=request.sid) # Envoit uniquement les cartes au joueur concerné
     # J'enverrai le nombre de carte uniquement à l'autre joueur.
+
+@socketio.on("draw_a_card")
+def handle_draw_a_card():
+    entry = sid_to_room.get(request.sid, None)
+    room_code, user_id = entry
+
+    draw_card(room_code, user_id)
+
+
+def draw_card(room_code, user_id):
+    hand[room_code][user_id].append("c4")
+    diffuse_hand()

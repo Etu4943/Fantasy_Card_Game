@@ -6,6 +6,7 @@
 
 {% block head %}
 	<link rel="stylesheet" href="{{ url_for('static', filename='CSS/chat.css')}}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='CSS/game.css')}}">
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 	<script>
 	    var socket = io();
@@ -57,8 +58,15 @@
 		}
 
 		socket.on('hand', (hand) => {
-		    console.log(hand); // ta main reçue du serveur
-		    // mets à jour ton affichage ici
+			let hand_div = document.getElementById("player-hand");
+			hand_div.innerHTML = "";
+		    for (card of hand) {
+		    	let new_node = document.createElement("div");
+		    	new_node.classList.add("card");
+		    	hand_div.appendChild(new_node);
+		    }
+		    	
+
 		});
 
 		document.addEventListener('DOMContentLoaded', () => {
@@ -86,14 +94,33 @@
 			});
 
 			socket.emit("ask_hand");
+
+
+			document.getElementById('player-hand').addEventListener('click', (e) => {
+			    let card = e.target.closest('.card');
+			    if (!card) return; // clic en dehors d'une carte, on ignore
+			    
+			    console.log('carte cliquée', card);
+			    // ta logique ici
+			});
+
+			document.getElementById('draw').addEventListener('click', () => {
+			    socket.emit('draw_a_card');
+			});
+
+			
 		});
 	</script>
 {% endblock %}
 
 {% block content %}
 
-	<div>
-		Display card
+	<div id="game-board">
+	    <div id="opponent-hand" class="card-zone"></div>
+	    <div id="opponent-play" class="card-zone"></div>
+	    <div id="draw-pile" class="card-zone"><div class="card" id="draw"></div></div>
+	    <div id="player-play" class="card-zone"></div>
+	    <div id="player-hand" class="card-zone"></div>
 	</div>
 	<div id="chat-panel">
 	    <button id="chat-toggle">
