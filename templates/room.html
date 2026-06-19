@@ -185,9 +185,16 @@
 			document.getElementById("draw").remove()
 		});
 
-		socket.on("set_round", (username) => {
+		socket.on("set_round", (current_id) => {
 			let node = document.getElementById("turn-text");
-			node.innerHTML = username;
+			let text = ""
+			if (current_id == {{ session["user_id"] }}){
+				text = "Your turn"
+			}else{
+				text = "Opponent's turn"
+			}
+
+			node.innerHTML = text;
 		});
 
 		document.addEventListener('DOMContentLoaded', () => {

@@ -54,10 +54,12 @@ def handle_join(data):
         player_round[room_code] = cycle([-2,-1]) # can't play while there isn't a second player
     else :
         player_round[room_code] = cycle(ROOMS[room_code]["players"])
-        toggle_round_player(room_code, request.sid)
-    for _ in range(random.randint(1, 10)) :
-        ROOMS[room_code]["current_player_id"] = next(player_round[room_code]) # Here is the randomization
+        for _ in range(random.randint(1, 10)) :
+            ROOMS[room_code]["current_player_id"] = next(player_round[room_code]) # Here is the randomization
         # I can't have it to begin with the second player. To investigate.
+        # My bad, i'm stupid. Solved !
+        toggle_round_player(room_code, user_id)
+
     hand[room_code][user_id] = []
     board[room_code][user_id] = []
     if room_code not in deck.keys() :
@@ -66,9 +68,12 @@ def handle_join(data):
     #socketio.emit('message', {'message':f'{session.get("username")} has entered the game !'}, room=room_code, include_self=False)
     diffuse_message({'message' : "has enter the chat"})
 
-def toggle_round_player(room_code, rsid):
-    emit("set_round", "Your turn", room=room_code, include_self=False);
-    emit("set_round", "Opponent's turn", room=room_code, to=rsid);
+def toggle_round_player(room_code, user_id):
+    emit("set_round", ROOMS[room_code]["current_player_id"], room=room_code)
+
+
+
+
 @socketio.on('disconnect')
 def handle_disconnect():
     entry = sid_to_room.pop(request.sid, None)
@@ -269,8 +274,7 @@ def hand_play(card_id):
     emit("redraw_hand", room=room_code, include_self=False)
 
 
-    emit("set_round", "Your turn", room=room_code, include_self=False);
-    emit("set_round", "Opponent's turn", room=room_code, to=request.sid);
+    toggle_round_player(room_code, user_id)
 
 def get_opponent_id(room_code, user_id):
     return (ROOMS[room_code]["players"] - {user_id}).pop()
