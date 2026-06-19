@@ -1,5 +1,5 @@
 from extensions import socketio
-from state import ROOMS, sid_to_room, hand, deck
+from state import ROOMS, sid_to_room, hand, deck, board
 
 from flask import request, session, redirect
 from flask_socketio import join_room, leave_room, send, SocketIO, emit
@@ -44,9 +44,10 @@ def handle_join(data):
     # Quand tu rejoins une partie, il faut lui créer et lui attribuer une main
     
     if room_code not in hand.keys() :
+        board[room_code] = dict()
         hand[room_code] = dict()
     hand[room_code][user_id] = []
-    
+    board[room_code][user_id] = []
     if room_code not in deck.keys() :
         init_deck(room_code)
     init_hand(room_code, user_id)
@@ -110,14 +111,40 @@ def diffuse_message(data, def_room_code=None):
         room_code = def_room_code # Au cas où le message vient du fait qu'il est parti, on peut plus récupérer entry
     else :
         room_code, user_id = entry
-    emit('recieve_message', {'user': session.get('username'),'message' : data['message']}, room=room_code)
+    if "user" in data.keys() :
+        sender = data["user"]
+    else :
+        sender = session.get("username")
+    emit('recieve_message', {'user': sender,'message' : data['message']}, room=room_code)
 
 @socketio.on("ask_hand")
 def handle_ask_hand():
     diffuse_hand()
 
-def diffuse_hand():
-    entry = sid_to_room.get(request.sid, None)
+def diffuse_board(rsid=None):
+    if rsid is None :
+        entry = sid_to_room.get(request.sid, None)
+        rsid = request.sid
+    else :
+        entry = sid_to_room.get(rsid, None)
+    if entry is None :
+        return
+    room_code, user_id = entry
+
+    # print(board[room_code][user_id])
+
+    board[room_code][user_id] = sorted(board[room_code][user_id], key=lambda d: d['name'])
+
+    emit("board", board[room_code][user_id], to=rsid)
+    # board_to_opponent = board_for_opponent(room_code, user_id)
+    emit("opponent_board", sorted(board[room_code][user_id], key=lambda d: d['name'], reverse=True), room=room_code, include_self=False)
+
+def diffuse_hand(rsid=None):
+    if rsid is None : # If i call diffus_hand from this code like hand_play
+        entry = sid_to_room.get(request.sid, None)
+    else :
+        entry = sid_to_room.get(rsid, None)
+
     if entry is None :
         return
     room_code, user_id = entry
@@ -162,6 +189,12 @@ def hand_for_opponent(room_code, user_id):
         hand_to_opponent.append({"id":card["id"]})
     return hand_to_opponent
 
+def board_for_opponent(room_code, user_id):
+    board_to_opponent = []
+    for card in board[room_code][user_id] :
+        board_to_opponent.append({"id":card["id"]})
+    return board_to_opponent
+
 
 
 
@@ -179,3 +212,27 @@ def handle_draw_a_card():
 
 def draw_card(room_code, user_id):
     diffuse_hand()
+
+
+@socketio.on("play")
+def hand_play(card_id):
+    entry = sid_to_room.get(request.sid, None)
+    if entry is None :
+        return
+
+    room_code, user_id = entry
+
+    if card_id not in [card["id"] for card in hand[room_code][user_id]] :
+        diffuse_message({"user": "system", "message":"CAUGHT CHEATING !"})
+        return
+
+    selected_card = [card for card in hand[room_code][user_id] if card["id"] == card_id][0]
+
+    hand[room_code][user_id].remove(selected_card)
+    board[room_code][user_id].append(selected_card)
+    diffuse_hand(request.sid)
+    diffuse_board(request.sid)
+
+
+
+

@@ -20,3 +20,5 @@ hand = dict()
 cards = dict()
 
 deck = dict()
+
+board = dict()

@@ -59,6 +59,87 @@
 			socket.emit('send_message', {'message': msg_content});
 		}
 
+		/*socket.on('board', (board) => {
+			let board_div = document.getElementById("player-play")
+			board_div.innerHTML = ""
+
+			for (card of board) {
+				let new_node = document.createElement("div");
+				new_node.classList.add("card")
+				new_node.style.backgroundImage = `url('/static/Assets/Cards/${card.name}.png')`;
+				new_node.id = card["id"];
+				board_div.append(new_node);
+			}
+		})*/
+
+		socket.on('board', (board) => {
+		    let board_div = document.getElementById("player-play");
+		    board_div.innerHTML = "";
+
+		    // Regroupe les cartes par nom, en créant un nouveau groupe après 3 cartes
+		    let groups = [];
+		    let current_group = null;
+
+		    for (let card of board) {
+		        if (!current_group || current_group.name !== card.name || current_group.cards.length >= 3) {
+		            current_group = { name: card.name, cards: [] };
+		            groups.push(current_group);
+		        }
+		        current_group.cards.push(card);
+		    }
+
+		    // Affiche chaque groupe comme un paquet empilé
+		    for (let group of groups) {
+		        let stack = document.createElement("div");
+		        stack.classList.add("card-stack");
+
+		        group.cards.forEach((card, i) => {
+		            let new_node = document.createElement("div");
+		            new_node.classList.add("card", "stacked-card");
+		            new_node.style.backgroundImage = `url('/static/Assets/Cards/${card.name}.png')`;
+		            new_node.style.setProperty('--stack-index', i);
+		            new_node.id = card["id"];
+		            stack.appendChild(new_node);
+		        });
+
+		        board_div.appendChild(stack);
+		    }
+		});
+
+		socket.on('opponent_board', (board) => {
+		    let opponent_board_div = document.getElementById("opponent-play");
+		    opponent_board_div.innerHTML = "";
+
+		    // Regroupe les cartes par nom, en créant un nouveau groupe après 3 cartes
+		    let groups = [];
+		    let current_group = null;
+
+		    for (let card of board) {
+		        if (!current_group || current_group.name !== card.name || current_group.cards.length >= 3) {
+		            current_group = { name: card.name, cards: [] };
+		            groups.push(current_group);
+		        }
+		        current_group.cards.push(card);
+		    }
+
+		    // Affiche chaque groupe comme un paquet empilé
+		    for (let group of groups) {
+		        let stack = document.createElement("div");
+		        stack.classList.add("card-stack");
+
+		        group.cards.forEach((card, i) => {
+		            let new_node = document.createElement("div");
+		            new_node.classList.add("card", "stacked-card", "opponent-play");
+		            new_node.style.backgroundImage = `url('/static/Assets/Cards/${card.name}.png')`;
+		            new_node.style.setProperty('--stack-index', i);
+		            new_node.id = card["id"];
+		            stack.appendChild(new_node);
+		        });
+
+		        opponent_board_div.appendChild(stack);
+		    }
+		});
+
 		socket.on('hand', (hand) => {
 			let hand_div = document.getElementById("player-hand");
 			hand_div.innerHTML = "";
@@ -66,7 +147,7 @@
 		    	let new_node = document.createElement("div");
 		    	new_node.classList.add("card");
 		    	new_node.style.backgroundImage = `url('/static/Assets/Cards/${card.name}.png')`;
-		    	new_node.id = card["id"]
+		    	new_node.id = card["id"];
 		    	hand_div.appendChild(new_node);
 
 		    }
@@ -127,7 +208,8 @@
 			    let card = e.target.closest('.card');
 			    if (!card) return; // clic en dehors d'une carte, on ignore
 			    
-			    console.log('carte cliquée', card);
+			    let card_id = card.id
+			    socket.emit("play", card_id);
 			    // ta logique ici
 			});
 

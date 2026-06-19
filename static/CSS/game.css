@@ -105,6 +105,22 @@
     scrollbar-width: none; /* Firefox */
 }
 
+.card-stack {
+    position: relative;
+    height: 80%;
+    aspect-ratio: 2 / 3;
+    flex-shrink: 0;
+}
+
+.stacked-card {
+    position: absolute;
+    top: calc(var(--stack-index) * 8px);
+    left: calc(var(--stack-index) * 4px);
+    height: 100%;
+    width: 100%;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
 /* Me :) */
 
 #draw {
@@ -113,4 +129,8 @@
     background-size: cover;
     background-color: transparent;
     border:None;
+}
+
+.opponent-play {
+    transform: rotate(180deg);
 }
