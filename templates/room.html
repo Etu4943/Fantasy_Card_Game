@@ -177,8 +177,17 @@
 			
 		});
 
+		socket.on("redraw_hand", () => {
+			socket.emit("ask_hand")
+		});
+
 		socket.on("empty_deck", () => {
 			document.getElementById("draw").remove()
+		});
+
+		socket.on("set_round", (username) => {
+			let node = document.getElementById("turn-text");
+			node.innerHTML = username;
 		});
 
 		document.addEventListener('DOMContentLoaded', () => {
@@ -229,7 +238,9 @@
 {% endblock %}
 
 {% block content %}
-
+	<div id="turn-indicator">
+	    <span id="turn-text">Wait for opponent ...</span>
+	</div>
 	<div id="game-board">
 	    <div id="opponent-hand" class="card-zone"></div>
 	    <div id="opponent-play" class="card-zone"></div>

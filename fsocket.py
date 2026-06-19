@@ -10,6 +10,7 @@ from card import Card
 
 from itertools import cycle
 import threading
+import random
 
 # user_id -> Timer en cours (déconnexion en attente)
 _pending_disconnects: dict[str, threading.Timer] = {}
@@ -49,8 +50,14 @@ def handle_join(data):
         board[room_code] = dict()
         hand[room_code] = dict()
 
-    player_round[room_code] = cycle(ROOMS[room_code]["players"])
-    ROOMS[room_code]["current_player_id"] = next(player_round[room_code]) # Arbitrary. Maybe random later
+    if len(ROOMS[room_code]["players"]) == 1 :
+        player_round[room_code] = cycle([-2,-1]) # can't play while there isn't a second player
+    else :
+        player_round[room_code] = cycle(ROOMS[room_code]["players"])
+        toggle_round_player(room_code, request.sid)
+    for _ in range(random.randint(1, 10)) :
+        ROOMS[room_code]["current_player_id"] = next(player_round[room_code]) # Here is the randomization
+        # I can't have it to begin with the second player. To investigate.
     hand[room_code][user_id] = []
     board[room_code][user_id] = []
     if room_code not in deck.keys() :
@@ -59,6 +66,9 @@ def handle_join(data):
     #socketio.emit('message', {'message':f'{session.get("username")} has entered the game !'}, room=room_code, include_self=False)
     diffuse_message({'message' : "has enter the chat"})
 
+def toggle_round_player(room_code, rsid):
+    emit("set_round", "Your turn", room=room_code, include_self=False);
+    emit("set_round", "Opponent's turn", room=room_code, to=rsid);
 @socketio.on('disconnect')
 def handle_disconnect():
     entry = sid_to_room.pop(request.sid, None)
@@ -81,7 +91,7 @@ def handle_disconnect():
             {'user': 'System', 'message': f'{user_id} has left the game.'},
             room=room_code
         )
-        print(f"{user_id} truly disconnected from {room_code}")
+        # print(f"{user_id} truly disconnected from {room_code}")
     timer = threading.Timer(DISCONNECT_GRACE, _do_remove)
     _pending_disconnects[user_id] = timer
     timer.start()
@@ -161,14 +171,16 @@ def diffuse_hand(rsid=None):
         return
     room_code, user_id = entry
     
+    # print(f"Room_code : {room_code} - user_id : {user_id}")
     emit("hand", hand[room_code][user_id], to=request.sid) # Envoit uniquement les cartes au joueur concerné
 
     """"
         I need to display the opponent card, with the ability to steal them (so I have to be able to identify them, so I need ID)
     """
-    hand_to_opponent = hand_for_opponent(room_code, user_id)
-    # print(hand_to_opponent)
-    emit("opponent_hand", hand[room_code][user_id], room=room_code, include_self=False)
+    if len(ROOMS[room_code]["players"]) > 1 :
+        hand_to_opponent = hand_for_opponent(room_code, user_id)
+        # print(hand_to_opponent)
+        emit("opponent_hand", hand[room_code][user_id], room=room_code, include_self=False)
 
 
 """
@@ -185,8 +197,8 @@ def handle_ask_opponent_hand():
         return
 
     room_code, user_id = entry
-    players_id_left_set = (ROOMS[room_code]["players"] - {user_id})
-    if players_id_left_set ==  0:
+    
+    if len(ROOMS[room_code]["players"]) ==  1:
         return
     opponent_id = (ROOMS[room_code]["players"] - {user_id}).pop()
 
@@ -240,7 +252,7 @@ def hand_play(card_id):
         return
 
     if ROOMS[room_code]["current_player_id"] != user_id :
-        print(f"Current player : {ROOMS[room_code]["current_player_id"]}")
+        # print(f"Current player : {ROOMS[room_code]["current_player_id"]}")
         return
     ROOMS[room_code]["current_player_id"] = next(player_round[room_code])
     selected_card = [card for card in hand[room_code][user_id] if card["id"] == card_id][0]
@@ -254,6 +266,11 @@ def hand_play(card_id):
     diffuse_hand(request.sid)
     diffuse_board(request.sid)
     
+    emit("redraw_hand", room=room_code, include_self=False)
+
+
+    emit("set_round", "Your turn", room=room_code, include_self=False);
+    emit("set_round", "Opponent's turn", room=room_code, to=request.sid);
 
 def get_opponent_id(room_code, user_id):
     return (ROOMS[room_code]["players"] - {user_id}).pop()
