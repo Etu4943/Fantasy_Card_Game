@@ -50,6 +50,8 @@
 			};
 		})
 
+
+
 		function send_message(){
 			let msg_input = document.getElementById("msg");
 			let msg_content = msg_input.value;
@@ -64,13 +66,30 @@
 		    	let new_node = document.createElement("div");
 		    	new_node.classList.add("card");
 		    	new_node.style.backgroundImage = `url('/static/Assets/Cards/${card.name}.png')`;
-		    	new_node.style.backgroundSize = "cover";
-		    	new_node.style.backgroundColor = "transparent";
+		    	new_node.id = card["id"]
 		    	hand_div.appendChild(new_node);
 
 		    }
 		    	
 
+		});
+
+		socket.on("opponent_hand", (cards) => {
+			let opponent_box = document.getElementById("opponent-hand");
+			console.log("Try to display opponent hand")
+			
+			opponent_box.innerHTML = "";
+
+			for (card of cards) {
+				let new_node = document.createElement("div");
+				new_node.classList.add("card")
+				new_node.classList.add("opponent")
+				new_node.id = card["id"]
+				new_node.style.backgroundImage = "url('/static/Assets/back_card.png')";
+		    	opponent_box.appendChild(new_node);
+			}
+
+			
 		});
 
 		socket.on("empty_deck", () => {
@@ -115,6 +134,8 @@
 			document.getElementById('draw').addEventListener('click', () => {
 			    socket.emit('draw_a_card');
 			});
+
+			socket.emit("ask_opponent_hand");
 
 			
 		});
