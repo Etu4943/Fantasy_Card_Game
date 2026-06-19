@@ -121,6 +121,80 @@
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
+/* ── Mobile layout ── */
+@media (max-width: 768px) {
+    #game-board {
+        top: 52px;
+        /* Vertical stack: opponent hand / play zones / draw+player hand */
+        grid-template-rows: auto 1fr auto auto;
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+        padding: 0.5rem;
+    }
+ 
+    #opponent-hand {
+        grid-column: 1;
+        grid-row: 1;
+        height: 90px;
+    }
+ 
+    /* Play zones: side by side in row 2 */
+    #opponent-play {
+        grid-column: 1;
+        grid-row: 2;
+        align-self: stretch;
+        height: 100%;
+        max-height: none;
+        /* stack inside row 2 — top half */
+        align-self: start;
+        height: 50%;
+    }
+ 
+    #player-play {
+        grid-column: 1;
+        grid-row: 2;
+        align-self: end;
+        height: 50%;
+        max-height: none;
+    }
+ 
+    /* Row 2 becomes a flex column for the two play zones */
+    #game-board {
+        grid-template-rows: 90px 1fr 60px 100px;
+    }
+ 
+    #draw-pile {
+        grid-column: 1;
+        grid-row: 3;
+        height: 56px;
+        width: auto;
+        justify-self: center;
+        align-self: center;
+    }
+ 
+    #draw-pile .card,
+    #draw {
+        height: 100%;
+    }
+ 
+    #player-hand {
+        grid-column: 1;
+        grid-row: 4;
+        height: 100px;
+        padding: 0 0.5rem;
+    }
+ 
+    /* Smaller cards on mobile */
+    .card {
+        height: 75px;
+    }
+ 
+    #player-hand > .card:active {
+        transform: scale(1.08);
+    }
+}
+
+
 /* Me :) */
 
 #draw {

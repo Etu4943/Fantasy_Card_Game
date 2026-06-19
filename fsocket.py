@@ -1,5 +1,5 @@
 from extensions import socketio
-from state import ROOMS, sid_to_room, hand, deck, board
+from state import ROOMS, sid_to_room, hand, deck, board, player_round
 
 from flask import request, session, redirect
 from flask_socketio import join_room, leave_room, send, SocketIO, emit
@@ -8,12 +8,14 @@ from game import init_hand, add_card_to_hand, init_deck
 from card import Card
 
 
-
+from itertools import cycle
 import threading
 
 # user_id -> Timer en cours (déconnexion en attente)
 _pending_disconnects: dict[str, threading.Timer] = {}
 DISCONNECT_GRACE = 5  # secondes
+
+_waiting_players: set[str] = set()
 
 @socketio.on('message')
 def handle_message(data):
@@ -25,7 +27,7 @@ def handle_join(data):
     user_id = session.get('user_id')
     if room_code not in ROOMS.keys() :
         session['room'] = None
-        redirect("/")
+        return redirect("/")
     # Annule une déco en attente pour ce joueur (= refresh)
     if user_id in _pending_disconnects:
         _pending_disconnects.pop(user_id).cancel()
@@ -46,6 +48,9 @@ def handle_join(data):
     if room_code not in hand.keys() :
         board[room_code] = dict()
         hand[room_code] = dict()
+
+    player_round[room_code] = cycle(ROOMS[room_code]["players"])
+    ROOMS[room_code]["current_player_id"] = next(player_round[room_code]) # Arbitrary. Maybe random later
     hand[room_code][user_id] = []
     board[room_code][user_id] = []
     if room_code not in deck.keys() :
@@ -61,6 +66,10 @@ def handle_disconnect():
         return
 
     room_code, user_id = entry
+
+    if user_id in _waiting_players:        # ← simple transit, on ignore
+        _waiting_players.discard(user_id)
+        return
 
     # Déconnexion douce : on attend avant d'agir
     def _do_remove():
@@ -98,6 +107,9 @@ def remove_player(room_code, user_id):
         ROOMS[room_code]['players'].discard(user_id)
         if not ROOMS[room_code]['players']:
             print("No more players. Lets NUKE IT")
+            del board[room_code]
+            del hand[room_code]
+            del player_round[room_code]
             del ROOMS[room_code]
 
 
@@ -140,7 +152,7 @@ def diffuse_board(rsid=None):
     emit("opponent_board", sorted(board[room_code][user_id], key=lambda d: d['name'], reverse=True), room=room_code, include_self=False)
 
 def diffuse_hand(rsid=None):
-    if rsid is None : # If i call diffus_hand from this code like hand_play
+    if rsid is None : # If i call diffuse_hand from this code like hand_play
         entry = sid_to_room.get(request.sid, None)
     else :
         entry = sid_to_room.get(rsid, None)
@@ -216,6 +228,7 @@ def draw_card(room_code, user_id):
 
 @socketio.on("play")
 def hand_play(card_id):
+    
     entry = sid_to_room.get(request.sid, None)
     if entry is None :
         return
@@ -226,12 +239,25 @@ def hand_play(card_id):
         diffuse_message({"user": "system", "message":"CAUGHT CHEATING !"})
         return
 
+    if ROOMS[room_code]["current_player_id"] != user_id :
+        print(f"Current player : {ROOMS[room_code]["current_player_id"]}")
+        return
+    ROOMS[room_code]["current_player_id"] = next(player_round[room_code])
     selected_card = [card for card in hand[room_code][user_id] if card["id"] == card_id][0]
 
     hand[room_code][user_id].remove(selected_card)
     board[room_code][user_id].append(selected_card)
+
+    if selected_card["name"] == "lutin" :
+        opponent_id = get_opponent_id(room_code, user_id)
+        hand[room_code][user_id], hand[room_code][opponent_id] = hand[room_code][opponent_id],hand[room_code][user_id]
     diffuse_hand(request.sid)
     diffuse_board(request.sid)
+    
+
+def get_opponent_id(room_code, user_id):
+    return (ROOMS[room_code]["players"] - {user_id}).pop()
+
 
 
 

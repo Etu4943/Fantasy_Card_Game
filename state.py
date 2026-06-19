@@ -1,3 +1,5 @@
+
+
 ROOMS = dict()
 
 sid_to_room = dict()
@@ -16,6 +18,8 @@ hand = dict()
 		}
 	}
 """
+
+player_round = dict()
 
 cards = dict()
 

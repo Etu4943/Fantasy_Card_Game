@@ -1,12 +1,17 @@
+/* ════════════════════════════════
+   LOGIN — desktop + mobile
+   ════════════════════════════════ */
+
 .login-page {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: calc(100vh - 60px); /* compense la navbar */
-  padding: 2rem;
+  min-height: calc(100vh - 56px);
+  padding: 2rem 1rem;
   font-family: 'DM Sans', sans-serif;
 }
 
+/* ── Desktop : côte à côte ── */
 .login-split {
   display: flex;
   align-items: stretch;
@@ -22,14 +27,17 @@
   justify-content: center;
 }
 
-/* Barre verticale centrale */
 .login-divider {
   width: 1px;
   background: rgba(0, 0, 0, 0.1);
-  margin: 3rem 0; /* ne prend pas toute la hauteur */
+  margin: 3rem 0;
   flex-shrink: 0;
 }
 
+/* ── Mobile : caché par défaut ── */
+.mobile-login { display: none; }
+
+/* ── Éléments communs ── */
 .login-title {
   font-size: 20px;
   font-weight: 500;
@@ -44,7 +52,6 @@
   margin: 0 0 2rem;
 }
 
-/* Champs */
 .login-form .field {
   display: flex;
   flex-direction: column;
@@ -60,13 +67,13 @@
 }
 
 .login-form input {
-  height: 38px;
+  height: 42px;
   border-radius: 7px;
   border: 1px solid rgba(0, 0, 0, 0.12);
   background: #f9f9f9;
   color: #111;
   font-family: 'DM Sans', sans-serif;
-  font-size: 14px;
+  font-size: 16px;
   padding: 0 12px;
   outline: none;
   transition: border-color 0.15s ease, background 0.15s ease;
@@ -77,17 +84,16 @@
   background: #fff;
 }
 
-/* Boutons */
 .btn {
   margin-top: 1.25rem;
   width: 100%;
-  height: 38px;
+  height: 44px;
   border-radius: 7px;
   border: 1px solid rgba(0, 0, 0, 0.15);
   background: transparent;
   color: #111;
   font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: background 0.15s ease;
@@ -103,6 +109,7 @@
 
 .btn-primary:hover { opacity: 0.85; }
 
+/* navbar helpers */
 .nav-right {
   display: flex;
   align-items: center;
@@ -114,4 +121,94 @@
   font-weight: 500;
   color: #111;
   letter-spacing: -0.01em;
+}
+
+
+/* ════════════════════════════════
+   MOBILE
+   ════════════════════════════════ */
+@media (max-width: 600px) {
+
+  /* Cache le layout desktop */
+  .login-split { display: none; }
+
+  /* Affiche le layout mobile */
+  .mobile-login {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 420px;
+    /* padding-top pour décaler un peu du bord de la navbar */
+    padding-top: 1rem;
+  }
+
+  /* ── Tab bar ── */
+  .tab-bar {
+    position: relative;
+    display: flex;
+    background: #f0f0f3;
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 2rem;
+  }
+
+  .tab-btn {
+    position: relative;
+    flex: 1;
+    z-index: 1;
+    border: none;
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #888;
+    padding: 10px 0;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: color 0.25s ease;
+  }
+
+  .tab-btn.active {
+    color: #111;
+  }
+
+  /* L'arrière-plan blanc qui glisse */
+  .tab-slider {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: calc(50% - 4px);
+    height: calc(100% - 8px);
+    background: #fff;
+    border-radius: 9px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+  }
+
+  /* ── Panels en fondu ── */
+  .tab-panels {
+    position: relative;
+    width: 100%;
+  }
+
+  .tab-panel {
+    width: 100%;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .tab-panel.active {
+    opacity: 1;
+    pointer-events: auto;
+    position: relative; /* prend de la place dans le flux uniquement quand actif */
+  }
+
+  .tab-panel .login-title {
+    margin-bottom: 1.5rem;
+  }
 }

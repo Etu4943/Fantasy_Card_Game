@@ -56,5 +56,74 @@
     </div>
 
   </div>
+    <div class="mobile-login">
+ 
+    <!-- Indicateur de tab -->
+    <div class="tab-bar">
+      <button class="tab-btn active" data-tab="login">Login</button>
+      <button class="tab-btn" data-tab="register">Register</button>
+      <div class="tab-slider"></div>
+    </div>
+ 
+    <!-- Conteneur qui slide -->
+    <div class="tab-panels">
+ 
+      <div class="tab-panel" id="m-login">
+        <h2 class="login-title">Glad to see you again.</h2>
+        <form class="login-form" action="/login" method="POST">
+          <div class="field">
+            <label for="m-login-email">E-mail</label>
+            <input type="email" id="m-login-email" name="email" autocomplete="off" placeholder="you@exemple.com" required>
+          </div>
+          <div class="field">
+            <label for="m-login-password">Password</label>
+            <input type="password" id="m-login-password" name="password" autocomplete="off" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+      </div>
+ 
+      <div class="tab-panel" id="m-register">
+        <h2 class="login-title">Welcome !</h2>
+        <form class="login-form" action="/register" method="POST">
+          <div class="field">
+            <label for="m-reg-username">Username</label>
+            <input type="text" id="m-reg-username" name="username" autocomplete="off" placeholder="Username" required>
+          </div>
+          <div class="field">
+            <label for="m-reg-email">E-mail</label>
+            <input type="email" id="m-reg-email" name="email" autocomplete="off" placeholder="you@exemple.com" required>
+          </div>
+          <div class="field">
+            <label for="m-reg-password">Password</label>
+            <input type="password" id="m-reg-password" name="password" autocomplete="off" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Register</button>
+        </form>
+      </div>
+ 
+    </div>
+  </div>
 </main>
+
+<script>
+  const tabs = document.querySelectorAll('.tab-btn');
+  const panelEls = document.querySelectorAll('.tab-panel');
+  const slider = document.querySelector('.tab-slider');
+ 
+  function switchTab(tabName) {
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tabName));
+    panelEls.forEach(p => p.classList.toggle('active', p.id === 'm-' + tabName));
+    slider.style.transform = tabName === 'login' ? 'translateX(0)' : 'translateX(100%)';
+  }
+ 
+  // Actif au chargement
+  document.getElementById('m-login').classList.add('active');
+ 
+  tabs.forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+</script>
+
+
 {% endblock %}
