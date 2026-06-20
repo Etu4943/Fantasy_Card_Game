@@ -298,8 +298,13 @@ def hand_play(data):
             handle_draw_a_card()
 
     elif selected_card["name"] == "elfe" :
-        highlight_board(request.sid)
-        return
+        if len(board[room_code][user_id]) != 1 :
+            # If there is no card on board to replay
+            # 1 because the elfe card is already "played" on backend 
+            highlight_board(request.sid)
+            return
+        else :
+            pass
 
     # For current user's visual :
     diffuse_hand(request.sid)
