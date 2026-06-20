@@ -118,7 +118,7 @@
     left: calc(var(--stack-index) * 4px);
     height: 100%;
     width: 100%;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    /*box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);*/
 }
 
 /* ── Mobile layout ── */
@@ -226,4 +226,12 @@
 
 .opponent-play {
     transform: rotate(180deg);
+}
+
+.highlighted {
+    filter: drop-shadow(0 0 5px #ED330E);
+}
+
+.highlighted:hover{
+    transform: scale(1.1);
 }

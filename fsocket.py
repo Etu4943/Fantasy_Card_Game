@@ -246,28 +246,44 @@ def handle_draw_a_card():
 def draw_card(room_code, user_id):
     diffuse_hand()
 
+def highlight_board(rsid):
+    emit("highlight_board",to=rsid)
+
+
 
 @socketio.on("play")
-def hand_play(card_id):
-    
+def hand_play(data):
+    card_id = data["card_id"]
+    is_from_elfe = data["is_from_elfe"]
+
     entry = sid_to_room.get(request.sid, None)
     if entry is None :
         return
 
     room_code, user_id = entry
 
-    if card_id not in [card["id"] for card in hand[room_code][user_id]] :
-        diffuse_message({"user": "system", "message":"CAUGHT CHEATING !"})
-        return
+    if is_from_elfe :
+        if data["card_id"] not in [card["id"] for card in board[room_code][user_id]] :
+            diffuse_message({"user": "system", "message":"CAUGHT CHEATING !"})
+            return
+    else :
+        if data["card_id"] not in [card["id"] for card in hand[room_code][user_id]] :
+            diffuse_message({"user": "system", "message":"CAUGHT CHEATING !"})
+            return
 
     if ROOMS[room_code]["current_player_id"] != user_id :
         # print(f"Current player : {ROOMS[room_code]["current_player_id"]}")
+        print("Not your turn !")
         return
-    ROOMS[room_code]["current_player_id"] = next(player_round[room_code])
-    selected_card = [card for card in hand[room_code][user_id] if card["id"] == card_id][0]
+    
+    if is_from_elfe :
+        selected_card = [card for card in board[room_code][user_id] if card["id"] == card_id][0]
+    else :
+        selected_card = [card for card in hand[room_code][user_id] if card["id"] == card_id][0]
 
-    hand[room_code][user_id].remove(selected_card)
-    board[room_code][user_id].append(selected_card)
+    if not data["is_from_elfe"] :
+        hand[room_code][user_id].remove(selected_card)
+        board[room_code][user_id].append(selected_card)
 
     if selected_card["name"] == "lutin" :
         opponent_id = get_opponent_id(room_code, user_id)
@@ -281,6 +297,10 @@ def hand_play(card_id):
         for _ in range(2) :
             handle_draw_a_card()
 
+    elif selected_card["name"] == "elfe" :
+        highlight_board(request.sid)
+        return
+
     # For current user's visual :
     diffuse_hand(request.sid)
     diffuse_board(request.sid)
@@ -289,7 +309,7 @@ def hand_play(card_id):
     emit("redraw_hand", room=room_code, include_self=False)
     emit("redraw_board", room=room_code, include_self=False)
 
-
+    ROOMS[room_code]["current_player_id"] = next(player_round[room_code])
     toggle_round_player(room_code, user_id)
 
 def get_opponent_id(room_code, user_id):

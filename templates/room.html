@@ -201,6 +201,35 @@
 			node.innerHTML = text;
 		});
 
+		function highlight_board() {
+			let player_board = document.getElementById("player-play");
+			for (stack of player_board.children){
+				for (child of stack.children) {
+					child.classList.toggle("highlighted");
+					if (child.onclick != null){
+						console.log("KILL onClick")
+						child.onclick = null;
+					}
+					else {
+						console.log("Creation de onClick")
+						child.onclick = function() { 
+							console.log("Clicked!")
+							highlight_board();
+							socket.emit("play", {"card_id" : child.id, "is_from_elfe":true});
+						};
+					}
+
+				}
+			}
+		}
+
+
+		socket.on("highlight_board", () => {
+			highlight_board();
+		});
+
+		
+
 		document.addEventListener('DOMContentLoaded', () => {
 		    document.getElementById('quit-btn').addEventListener('click', () => {
 			    socket.emit('leave');
@@ -233,7 +262,7 @@
 			    if (!card) return; // clic en dehors d'une carte, on ignore
 			    
 			    let card_id = card.id
-			    socket.emit("play", card_id);
+			    socket.emit("play", {"card_id":card_id, "is_from_elfe":false});
 			    // ta logique ici
 			});
 
