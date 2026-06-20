@@ -148,6 +148,10 @@ def diffuse_message(data, def_room_code=None):
 def handle_ask_hand():
     diffuse_hand()
 
+@socketio.on("ask_board")
+def handle_ask_board():
+    diffuse_board()
+
 def diffuse_board(rsid=None):
     if rsid is None :
         entry = sid_to_room.get(request.sid, None)
@@ -268,10 +272,22 @@ def hand_play(card_id):
     if selected_card["name"] == "lutin" :
         opponent_id = get_opponent_id(room_code, user_id)
         hand[room_code][user_id], hand[room_code][opponent_id] = hand[room_code][opponent_id],hand[room_code][user_id]
+
+    elif selected_card["name"] == "farfadet" :
+        opponent_id = get_opponent_id(room_code, user_id)
+        board[room_code][user_id],board[room_code][opponent_id] = board[room_code][opponent_id],board[room_code][user_id]
+
+    elif selected_card["name"] == "gnome" :
+        for _ in range(2) :
+            handle_draw_a_card()
+
+    # For current user's visual :
     diffuse_hand(request.sid)
     diffuse_board(request.sid)
     
+    # For opponent's visual :
     emit("redraw_hand", room=room_code, include_self=False)
+    emit("redraw_board", room=room_code, include_self=False)
 
 
     toggle_round_player(room_code, user_id)

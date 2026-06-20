@@ -181,6 +181,10 @@
 			socket.emit("ask_hand")
 		});
 
+		socket.on("redraw_board", () => {
+			socket.emit("ask_board")
+		});
+
 		socket.on("empty_deck", () => {
 			document.getElementById("draw").remove()
 		});
@@ -233,9 +237,9 @@
 			    // ta logique ici
 			});
 
-			document.getElementById('draw').addEventListener('click', () => {
+			/*document.getElementById('draw').addEventListener('click', () => {
 			    socket.emit('draw_a_card');
-			});
+			});*/
 
 			socket.emit("ask_opponent_hand");
 
