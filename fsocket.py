@@ -61,9 +61,12 @@ def handle_join(data):
         player_round[room_code] = cycle(ROOMS[room_code]["players"])
         for _ in range(random.randint(1, 10)) :
             ROOMS[room_code]["current_player_id"] = next(player_round[room_code]) # Here is the randomization
-        # I can't have it to begin with the second player. To investigate.
-        # My bad, i'm stupid. Solved !
+        # Here is the beginning of the game.
         emit("deblur", room=room_code)
+        if ROOMS[room_code]["current_player_id"] == user_id :
+            emit("highlight_deck", to=request.sid)
+        else :
+            emit("highlight_deck", room=room_code, include_self=False)
         toggle_round_player(room_code, user_id)
 
     hand[room_code][user_id] = []
@@ -241,7 +244,7 @@ def board_for_opponent(room_code, user_id):
 
 @socketio.on("draw_a_card")
 def handle_draw_a_card():
-
+    print("Want to draw a card")
     room_code, user_id = (session.get("room"), session.get("user_id"))
     add_card_to_hand(room_code, user_id)
     draw_card(room_code, user_id)
@@ -380,6 +383,9 @@ def hand_play(data):
     ROOMS[room_code]["current_player_id"] = next(player_round[room_code])
     toggle_round_player(room_code, user_id)
 
+    if len(deck[room_code]) > 0 :
+        emit("highlight_deck", room=room_code, include_self=False)
+
     if len(deck[room_code]) == 0 and len(hand[room_code][opponent_id]) == 0 :
         finish(room_code, user_id, opponent_id)
 
@@ -430,6 +436,11 @@ def steal_card_from_board(data):
     ROOMS[room_code]["current_player_id"] = next(player_round[room_code])
     toggle_round_player(room_code, user_id)
 
+    if len(deck[room_code]) > 0 :
+        emit("highlight_deck", room=room_code, include_self=False)
+
+    if len(deck[room_code]) == 0 and len(hand[room_code][opponent_id]) == 0 :
+        finish(room_code, user_id, opponent_id)
 @socketio.on("steal_card_from_hand")
 def steal_card_from_hand(data):
     card_id = data["card_id"]
@@ -466,6 +477,9 @@ def steal_card_from_hand(data):
         emit("redraw_hand", room=room_code, include_self=False)
         emit("redraw_board", room=room_code, include_self=False)
 
+        if len(deck[room_code]) > 0 :
+            emit("highlight_deck", room=room_code, include_self=False)
+
         ROOMS[room_code]["current_player_id"] = next(player_round[room_code])
         toggle_round_player(room_code, user_id)
         emit("disable_opponent_hand_steal", to=request.sid)
@@ -479,6 +493,7 @@ def steal_card_from_hand(data):
     emit("redraw_board", room=room_code, include_self=False)
     # highlight_opponent_hand(request.sid)
         
+    
 
     if len(deck[room_code]) == 0 and len(hand[room_code][opponent_id]) == 0 :
         finish(room_code, user_id, opponent_id)
