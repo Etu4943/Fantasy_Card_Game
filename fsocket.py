@@ -407,7 +407,7 @@ def steal_card_from_hand(data):
 
     card_to_steal[room_code][user_id] -= 1
 
-    if card_to_steal[room_code][user_id] == 0 :
+    if card_to_steal[room_code][user_id] == 0 or len(hand[room_code][opponent_id]) == 0:
 
         diffuse_hand(request.sid)
         diffuse_board(request.sid)
