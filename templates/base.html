@@ -22,21 +22,27 @@
 			    </a>
 
 			    <ul class="nav-links">
-			      <li><a href="/game" class="nav-link {% if request.path == '/game' %}active{% endif %}">Game</a></li>
 			      {% if session['room'] %}
 			      	<li><a id="quit-btn" href="#" class="nav-link">Quit</a></li>
 			      {% else %}
-			      	<li><a href="/join" class="nav-link {% if request.path == '/join' %}active{% endif %}">Join</a></li>
+			      	<li><a href="/join" class="nav-link {% if request.path == '/join' %}active{% endif %}">{{ t.join }}</a></li>
 			      {% endif %}
-			      <li><a href="/chat" class="nav-link {% if request.path == '/chat' %}active{% endif %}">Chat</a></li>
 
 			    </ul>
+			    
 			    <div class="nav-right">
+			    	<div class="lang-dropdown">
+				        <button id="lang-btn" class="lang-btn">{{ session.get('lang', 'fr').upper() }} ▾</button>
+				        <div id="lang-menu" class="lang-menu">
+				            <a href="/set_lang/fr">Français</a>
+				            <a href="/set_lang/en">English</a>
+				        </div>
+				    </div>
 			    	{% if session['user_id'] %}
 				    	<span class="nav-username">{{ session['username'] }}</span>
-				    	<a href="/logout" class="nav-btn">Logout</a>
+				    	<a href="/logout" class="nav-btn">{{ t.logout }}</a>
 				    {% else %}
-				    	<a href="/login" class="nav-btn">Login</a>
+				    	<a href="/login" class="nav-btn">{{ t.login }}</a>
 				    {% endif %}
 			    </div>
 			    
@@ -49,4 +55,20 @@
 		</content>
 		
 	</body>
+
+	<script>
+	    document.addEventListener('DOMContentLoaded', () => {
+	        const langBtn = document.getElementById('lang-btn');
+	        const langMenu = document.getElementById('lang-menu');
+
+	        langBtn.addEventListener('click', (e) => {
+	            e.stopPropagation();
+	            langMenu.classList.toggle('open');
+	        });
+
+	        document.addEventListener('click', () => {
+	            langMenu.classList.remove('open');
+	        });
+	    });
+	</script>
 </html>

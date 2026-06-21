@@ -14,19 +14,19 @@
 
     <!-- Connexion -->
     <div class="login-panel">
-      <h2 class="login-title">Login</h2>
-      <p class="login-sub">Glad to see you again.</p>
+      <h2 class="login-title">{{ t.login }}</h2>
+      <p class="login-sub">{{ t.welcome }}</p>
 
       <form class="login-form" action="/login" method="POST">
         <div class="field">
-          <label for="login-email">E-mail</label>
-          <input type="email" id="login-email" name="email" autocomplete="off" placeholder="vous@exemple.com" required>
+          <label for="login-email">{{ t.email }}</label>
+          <input type="email" id="login-email" name="email" autocomplete="off" placeholder="{{ t.email_placeholder }}" required>
         </div>
         <div class="field">
-          <label for="login-password">Password</label>
+          <label for="login-password">{{ t.password }}</label>
           <input type="password" id="login-password" name="password" autocomplete="off" placeholder="••••••••" required>
         </div>
-        <button type="submit" class="btn btn-primary">Login</button>
+        <button type="submit" class="btn btn-primary">{{ t.login }}</button>
       </form>
     </div>
 
@@ -35,23 +35,23 @@
 
     <!-- Inscription -->
     <div class="login-panel">
-      <h2 class="login-title">Create an account</h2>
-      <p class="login-sub">Join us easily !</p>
+      <h2 class="login-title">{{ t.create_an_account }}</h2>
+      <p class="login-sub">{{ t.create_an_account_placeholder }}</p>
 
       <form class="login-form" action="/register" method="POST">
         <div class="field">
-          <label for="reg-username">Username</label>
-          <input type="text" id="reg-username" name="username" autocomplete="off" placeholder="Username" required>
+          <label for="reg-username">{{ t.username }}</label>
+          <input type="text" id="reg-username" name="username" autocomplete="off" placeholder="{{ t.username }}" required>
         </div>
         <div class="field">
-          <label for="reg-email">E-mail</label>
-          <input type="email" id="reg-email" name="email" autocomplete="off" placeholder="vous@exemple.com" required>
+          <label for="reg-email">{{ t.email }}</label>
+          <input type="email" id="reg-email" name="email" autocomplete="off" placeholder="{{ t.email_placeholder }}" required>
         </div>
         <div class="field">
-          <label for="reg-password">Password</label>
+          <label for="reg-password">{{ t.password }}</label>
           <input type="password" id="reg-password" name="password" autocomplete="off" placeholder="••••••••" required>
         </div>
-        <button type="submit" class="btn">Register</button>
+        <button type="submit" class="btn">{{ t.register }}</button>
       </form>
     </div>
 
@@ -60,8 +60,8 @@
  
     <!-- Indicateur de tab -->
     <div class="tab-bar">
-      <button class="tab-btn active" data-tab="login">Login</button>
-      <button class="tab-btn" data-tab="register">Register</button>
+      <button class="tab-btn active" data-tab="login">{{ t.login }}</button>
+      <button class="tab-btn" data-tab="register">{{ t.create_an_account }}</button>
       <div class="tab-slider"></div>
     </div>
  
@@ -69,36 +69,36 @@
     <div class="tab-panels">
  
       <div class="tab-panel" id="m-login">
-        <h2 class="login-title">Glad to see you again.</h2>
+        <h2 class="login-title">{{ t.welcome_phrase }}</h2>
         <form class="login-form" action="/login" method="POST">
           <div class="field">
-            <label for="m-login-email">E-mail</label>
-            <input type="email" id="m-login-email" name="email" autocomplete="off" placeholder="you@exemple.com" required>
+            <label for="m-login-email">{{ t.email }}</label>
+            <input type="email" id="m-login-email" name="email" autocomplete="off" placeholder="{{ t.email_placeholder }}" required>
           </div>
           <div class="field">
-            <label for="m-login-password">Password</label>
+            <label for="m-login-password">{{ t.password }}</label>
             <input type="password" id="m-login-password" name="password" autocomplete="off" placeholder="••••••••" required>
           </div>
-          <button type="submit" class="btn btn-primary">Login</button>
+          <button type="submit" class="btn btn-primary">{{ t.login }}</button>
         </form>
       </div>
  
       <div class="tab-panel" id="m-register">
-        <h2 class="login-title">Welcome !</h2>
+        <h2 class="login-title">{{ t.welcome }}</h2>
         <form class="login-form" action="/register" method="POST">
           <div class="field">
-            <label for="m-reg-username">Username</label>
-            <input type="text" id="m-reg-username" name="username" autocomplete="off" placeholder="Username" required>
+            <label for="m-reg-username">{{ t.username }}</label>
+            <input type="text" id="m-reg-username" name="username" autocomplete="off" placeholder="{{ t.username }}" required>
           </div>
           <div class="field">
-            <label for="m-reg-email">E-mail</label>
-            <input type="email" id="m-reg-email" name="email" autocomplete="off" placeholder="you@exemple.com" required>
+            <label for="m-reg-email">{{ t.email }}</label>
+            <input type="email" id="m-reg-email" name="email" autocomplete="off" placeholder="{{ t.email_placeholder }}" required>
           </div>
           <div class="field">
-            <label for="m-reg-password">Password</label>
+            <label for="m-reg-password">{{ t.password }}</label>
             <input type="password" id="m-reg-password" name="password" autocomplete="off" placeholder="••••••••" required>
           </div>
-          <button type="submit" class="btn btn-primary">Register</button>
+          <button type="submit" class="btn btn-primary">{{ t.register }}</button>
         </form>
       </div>
  

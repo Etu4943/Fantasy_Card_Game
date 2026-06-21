@@ -1,16 +1,23 @@
-from flask import Flask, render_template, request, redirect, session, url_for
+from flask import Flask, render_template, request, redirect, session, url_for, g
 from extensions import socketio
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 import fsocket
+
+import json
+import os
 
 from state import ROOMS
 from random import randint
 
 from functools import wraps
 
+
+
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "SuperSecretKeyOMG"
+app.config['BABEL_DEFAULT_LOCALE'] = 'fr'
+AVAILABLE_LANGUAGES = ["fr", "en"]
 socketio.init_app(app)
 
 db = sqlite3.connect("fantasy.db", check_same_thread=False)
@@ -126,13 +133,34 @@ def quit_room():
 	session.pop("room", None)
 	return redirect("/join")
 
-
 def create_room_sequence(nb_letter):
 	room_sequence = ""
 	for _ in range(nb_letter) :
 		room_sequence += chr(ord('A') + randint(0,25))
 
 	return room_sequence
+
+@app.before_request
+def set_language():
+    g.lang = session.get('lang', 'fr')  # ← lit la session à chaque requête
+
+@app.route('/set_lang/<lang>')
+def set_lang(lang):
+    if lang in AVAILABLE_LANGUAGES:
+    	session['lang'] = lang
+    return redirect(request.referrer or '/')
+
+def get_translations(lang):
+    path = os.path.join(app.root_path, 'locales', lang, 'login.json')
+    with open(path, encoding='utf-8') as f:
+        return json.load(f)
+
+@app.context_processor
+def inject_translations():
+    lang = g.get('lang', 'fr') # Try to get the language, fr by default
+    session["lang"] = lang
+    return dict(t=get_translations(lang))
+
 
 if __name__ == "__main__" :
 	socketio.run(app)
