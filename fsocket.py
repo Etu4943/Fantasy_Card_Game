@@ -483,6 +483,9 @@ def steal_card_from_hand(data):
         ROOMS[room_code]["current_player_id"] = next(player_round[room_code])
         toggle_round_player(room_code, user_id)
         emit("disable_opponent_hand_steal", to=request.sid)
+
+        if len(deck[room_code]) == 0 and len(hand[room_code][opponent_id]) == 0 :
+            finish(room_code, user_id, opponent_id)
         return
 
     diffuse_hand(request.sid)
