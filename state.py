@@ -26,3 +26,5 @@ cards = dict()
 deck = dict()
 
 board = dict()
+
+card_to_steal = dict()

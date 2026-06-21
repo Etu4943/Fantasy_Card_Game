@@ -10,6 +10,8 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 	<script>
 	    var socket = io();
+	    let can_steal = false; /*Not a big deal that is client-side, because it only manage the front-end highlight, not the backend*/
+
 	    socket.on('connect', () => {
 	        socket.emit('join', { room_code: "{{ room_code }}" });
 	    });
@@ -172,6 +174,9 @@
 				new_node.id = card["id"]
 				new_node.style.backgroundImage = "url('/static/Assets/back_card.png')";
 		    	opponent_box.appendChild(new_node);
+		    	if (can_steal){
+		    		new_node.classList.add("highlighted");
+		    	}
 			}
 
 			
@@ -205,30 +210,81 @@
 			let player_board = document.getElementById("player-play");
 			for (stack of player_board.children){
 				for (child of stack.children) {
-					child.classList.toggle("highlighted");
-					if (child.onclick != null){
-						console.log("KILL onClick")
-						child.onclick = null;
+					if (child.backgroundImahe != 'url("/static/Assets/Cards/elfe.png"'){
+						child.classList.toggle("highlighted");
+						if (child.onclick != null){
+							console.log("KILL onClick")
+							child.onclick = null;
+						}
+						else {
+							console.log("Creation de onClick")
+							child.onclick = function() { 
+								console.log("Clicked!")
+								/*highlight_board();*/
+								socket.emit("play", {"card_id" : child.id, "is_from_elfe":true});
+							};
+						}
+
 					}
-					else {
-						console.log("Creation de onClick")
-						child.onclick = function() { 
-							console.log("Clicked!")
-							highlight_board();
-							socket.emit("play", {"card_id" : child.id, "is_from_elfe":true});
-						};
-					}
+					
 
 				}
 			}
 		}
+
+		function on_opponent_board_click(e){
+			let card = e.target.closest('.card');
+		    if (!card) return;
+		    let card_id = card.id
+		    socket.emit("steal_card_from_board", {"card_id" : card.id});
+		}
+
+		function highlight_opponent_board() {
+			let opponent_board = document.getElementById("opponent-play");
+			for (stack of opponent_board.children){
+				stack.addEventListener('click', on_opponent_board_click);
+				for (card of stack.children){
+					card.classList.toggle("highlighted");
+				}
+			}
+
+		}
+
+		function on_opponent_hand_click(e){
+			let card = e.target.closest('.card');
+		    if (!card) return;
+		    let card_id = card.id
+		    socket.emit("steal_card_from_hand", {"card_id" : card.id});
+		}
+
+		function highlight_opponent_hand(){
+			can_steal = true;
+			document.querySelectorAll('#opponent-hand .card').forEach(card => {
+		        card.classList.add('highlighted');
+		    });
+			document.getElementById('opponent-hand').addEventListener('click', on_opponent_hand_click);
+		}
+
+		socket.on("disable_opponent_hand_steal", () => {
+			can_steal = false;
+			document.getElementById('opponent-hand').removeEventListener('click', on_opponent_hand_click);
+		});
+
 
 
 		socket.on("highlight_board", () => {
 			highlight_board();
 		});
 
-		
+		socket.on("highlight_opponent_board", () => {
+			highlight_opponent_board();
+		});
+
+		socket.on("highlight_opponent_hand", () => {
+
+			highlight_opponent_hand();
+		});
+
 
 		document.addEventListener('DOMContentLoaded', () => {
 		    document.getElementById('quit-btn').addEventListener('click', () => {

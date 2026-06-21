@@ -1,5 +1,5 @@
 from extensions import socketio
-from state import ROOMS, sid_to_room, hand, deck, board, player_round
+from state import ROOMS, sid_to_room, hand, deck, board, player_round, card_to_steal
 
 from flask import request, session, redirect
 from flask_socketio import join_room, leave_room, send, SocketIO, emit
@@ -41,7 +41,7 @@ def handle_join(data):
 
     ROOMS[room_code]["players"].add(user_id)
     sid_to_room[request.sid] = (room_code, user_id)
-
+    
 
 
     # Quand tu rejoins une partie, il faut lui créer et lui attribuer une main
@@ -49,6 +49,8 @@ def handle_join(data):
     if room_code not in hand.keys() :
         board[room_code] = dict()
         hand[room_code] = dict()
+        card_to_steal[room_code] = dict()
+    card_to_steal[room_code][user_id] = 0
 
     if len(ROOMS[room_code]["players"]) == 1 :
         player_round[room_code] = cycle([-2,-1]) # can't play while there isn't a second player
@@ -249,6 +251,12 @@ def draw_card(room_code, user_id):
 def highlight_board(rsid):
     emit("highlight_board",to=rsid)
 
+def highlight_opponent_board(rsid):
+    emit("highlight_opponent_board",to=rsid)
+
+def highlight_opponent_hand(rsid):
+    emit("highlight_opponent_hand",to=rsid)
+
 
 
 @socketio.on("play")
@@ -297,6 +305,8 @@ def hand_play(data):
         for _ in range(2) :
             handle_draw_a_card()
 
+
+
     elif selected_card["name"] == "elfe" :
         if len(board[room_code][user_id]) != 1 :
             # If there is no card on board to replay
@@ -305,6 +315,24 @@ def hand_play(data):
             return
         else :
             pass
+
+    elif selected_card["name"] == "dryade":
+        highlight_opponent_board(request.sid)
+        return
+
+    elif selected_card["name"] == "korrigan":
+        card_to_steal[room_code][user_id] = 2
+
+        # For current user's visual :
+        diffuse_hand(request.sid)
+        diffuse_board(request.sid)
+        
+        # For opponent's visual :
+        emit("redraw_hand", room=room_code, include_self=False)
+        emit("redraw_board", room=room_code, include_self=False)
+    
+        highlight_opponent_hand(request.sid)
+        return
 
     # For current user's visual :
     diffuse_hand(request.sid)
@@ -316,6 +344,107 @@ def hand_play(data):
 
     ROOMS[room_code]["current_player_id"] = next(player_round[room_code])
     toggle_round_player(room_code, user_id)
+
+@socketio.on("steal_card_from_board")
+def steal_card_from_board(data):
+    card_id = data["card_id"]
+
+    entry = sid_to_room.get(request.sid)
+    if entry is None :
+        return
+
+    room_code, user_id = entry
+    opponent_id = get_opponent_id(room_code, user_id)
+
+    if card_id not in [card["id"] for card in board[room_code][opponent_id]]:
+        diffuse_message({"user": "system", "message":"CAUGHT CHEATING !"})
+        return
+
+    selected_card = [card for card in board[room_code][opponent_id] if card["id"] == card_id][0]
+
+    board[room_code][opponent_id].remove(selected_card)
+    board[room_code][user_id].append(selected_card)
+
+    """
+        Maybe try to encapsulate the "refresh" system ?
+    """
+    # For current user's visual :
+    diffuse_hand(request.sid)
+    diffuse_board(request.sid)
+    
+    # For opponent's visual :
+    emit("redraw_hand", room=room_code, include_self=False)
+    emit("redraw_board", room=room_code, include_self=False)
+
+    ROOMS[room_code]["current_player_id"] = next(player_round[room_code])
+    toggle_round_player(room_code, user_id)
+
+@socketio.on("steal_card_from_hand")
+def steal_card_from_hand(data):
+    card_id = data["card_id"]
+
+    entry = sid_to_room.get(request.sid)
+
+    if entry is None :
+        return
+
+    room_code, user_id = entry
+
+    opponent_id = get_opponent_id(room_code, user_id)
+    if card_id not in [card["id"] for card in hand[room_code][opponent_id]]:
+        print("Cheating !")
+        print(f"Card id : {card_id}")
+        diffuse_message({"user": "system", "message":"CAUGHT CHEATING !"})
+        return
+
+    selected_card = [card for card in hand[room_code][opponent_id] if card["id"] == card_id][0]
+
+    hand[room_code][opponent_id].remove(selected_card)
+    hand[room_code][user_id].append(selected_card)
+
+    card_to_steal[room_code][user_id] -= 1
+
+    if card_to_steal[room_code][user_id] == 0 :
+
+        diffuse_hand(request.sid)
+        diffuse_board(request.sid)
+        
+        # For opponent's visual :
+        emit("redraw_hand", room=room_code, include_self=False)
+        emit("redraw_board", room=room_code, include_self=False)
+
+        ROOMS[room_code]["current_player_id"] = next(player_round[room_code])
+        toggle_round_player(room_code, user_id)
+        emit("disable_opponent_hand_steal", to=request.sid)
+        return
+
+    diffuse_hand(request.sid)
+    diffuse_board(request.sid)
+    
+    # For opponent's visual :
+    emit("redraw_hand", room=room_code, include_self=False)
+    emit("redraw_board", room=room_code, include_self=False)
+    # highlight_opponent_hand(request.sid)
+        
+
+
+    # " CAUGHT CHEATING ?????"
+
+    # """
+    #     Maybe try to encapsulate the "refresh" system ?
+    # """
+    # # For current user's visual :
+    # diffuse_hand(request.sid)
+    # diffuse_board(request.sid)
+    
+    # # For opponent's visual :
+    # emit("redraw_hand", room=room_code, include_self=False)
+    # emit("redraw_board", room=room_code, include_self=False)
+
+    # if card_to_steal[room_code][user_id] == 0 :
+    #     ROOMS[room_code]["current_player_id"] = next(player_round[room_code])
+    #     toggle_round_player(room_code, user_id)
+    # highlight_opponent_hand(request.sid)
 
 def get_opponent_id(room_code, user_id):
     return (ROOMS[room_code]["players"] - {user_id}).pop()
