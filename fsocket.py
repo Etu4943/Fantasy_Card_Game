@@ -395,7 +395,7 @@ def finish(room_code, user_id, opponent_id) :
 
     if user_score > opponent_score :
         winner_id = user_id
-    if user_score < opponent_score :
+    elif user_score < opponent_score :
         winner_id = opponent_id
     else :
         winner_id = None
