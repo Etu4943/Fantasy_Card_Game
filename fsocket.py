@@ -52,6 +52,7 @@ def handle_join(data):
         card_to_steal[room_code] = dict()
         last_action[room_code] = dict()
         last_action[room_code]["cards"] = []
+        last_action[room_code]["name"] = ""
     card_to_steal[room_code][user_id] = 0
 
     if len(ROOMS[room_code]["players"]) == 1 :
@@ -62,6 +63,7 @@ def handle_join(data):
             ROOMS[room_code]["current_player_id"] = next(player_round[room_code]) # Here is the randomization
         # I can't have it to begin with the second player. To investigate.
         # My bad, i'm stupid. Solved !
+        emit("deblur", room=room_code)
         toggle_round_player(room_code, user_id)
 
     hand[room_code][user_id] = []
@@ -305,6 +307,7 @@ def hand_play(data):
         last_action[room_code]["name"] = "farfadet"
 
     elif selected_card["name"] == "gnome" :
+        last_action[room_code]["name"] = "gnome"
         for _ in range(2) :
             handle_draw_a_card()
 
@@ -328,28 +331,25 @@ def hand_play(data):
             pass
 
     elif selected_card["name"] == "fee":
-        if len(last_action[room_code]) == 0 :
-            pass
-            last_action[room_code] = dict()
-        else :
-            name = last_action[room_code]["name"]
+        name = last_action[room_code]["name"]
 
-            if name == "farfadet" :
-                board[room_code][user_id].remove(selected_card)
-                board[room_code][user_id], board[room_code][opponent_id] = board[room_code][opponent_id], board[room_code][user_id]
-                board[room_code][user_id].append(selected_card) # Because in real life, you "refuse" the action by putting this in your board
-            elif name == "lutin" :
-                hand[room_code][user_id], hand[room_code][opponent_id] = hand[room_code][opponent_id], hand[room_code][user_id]
-            elif name == "dryade" :
-                for card in last_action[room_code]["cards"] :
-                    board[room_code][opponent_id].remove(card) 
-                    board[room_code][user_id].append(card)
-            elif name == "korrigan" :
-                for card in last_action[room_code]["cards"] :
-                    hand[room_code][opponent_id].remove(card)
-                    hand[room_code][user_id].append(card)
-            last_action[room_code] = dict()
-            last_action[room_code]["cards"] = []
+        if name == "farfadet" :
+            board[room_code][user_id].remove(selected_card)
+            board[room_code][user_id], board[room_code][opponent_id] = board[room_code][opponent_id], board[room_code][user_id]
+            board[room_code][user_id].append(selected_card) # Because in real life, you "refuse" the action by putting this in your board
+        elif name == "lutin" :
+            hand[room_code][user_id], hand[room_code][opponent_id] = hand[room_code][opponent_id], hand[room_code][user_id]
+        elif name == "dryade" :
+            for card in last_action[room_code]["cards"] :
+                board[room_code][opponent_id].remove(card) 
+                board[room_code][user_id].append(card)
+        elif name == "korrigan" :
+            for card in last_action[room_code]["cards"] :
+                hand[room_code][opponent_id].remove(card)
+                hand[room_code][user_id].append(card)
+        last_action[room_code] = dict()
+        last_action[room_code]["name"] = []
+        last_action[room_code]["cards"] = []
 
 
             
@@ -380,6 +380,20 @@ def hand_play(data):
     ROOMS[room_code]["current_player_id"] = next(player_round[room_code])
     toggle_round_player(room_code, user_id)
 
+    if len(deck[room_code]) == 0 and len(hand[room_code][opponent_id]) == 0 :
+        finish(room_code, user_id, opponent_id)
+
+def finish(room_code, user_id, opponent_id) :
+    opponent_score = len(board[room_code][opponent_id])
+    user_score = len(board[room_code][user_id])
+
+    if user_score > opponent_score :
+        winner_id = user_id
+    if user_score < opponent_score :
+        winner_id = opponent_id
+    else :
+        winner_id = None
+    emit("game_over", {"winner_id":winner_id, "scores":f"You: {user_score} pts &nbsp;|&nbsp; Opponent: {opponent_score} pts", "is_even": winner_id==None}, room=room_code)
 @socketio.on("steal_card_from_board")
 def steal_card_from_board(data):
     card_id = data["card_id"]
@@ -466,7 +480,8 @@ def steal_card_from_hand(data):
     # highlight_opponent_hand(request.sid)
         
 
-
+    if len(deck[room_code]) == 0 and len(hand[room_code][opponent_id]) == 0 :
+        finish(room_code, user_id, opponent_id)
     # " CAUGHT CHEATING ?????"
 
     # """

@@ -286,6 +286,42 @@
 			highlight_opponent_hand();
 		});
 
+		socket.on("deblur",() => {
+			document.getElementById("blur-overlay").classList.remove("visible");
+		})
+
+
+		function show_end_screen(did_win, scores, is_even) {
+		    let overlay = document.getElementById("end-overlay");
+		    let result  = document.getElementById("end-result");
+		    let scoresDiv = document.getElementById("end-scores");
+
+		    if (is_even){
+		    	result.textContent = "Even !"
+		    	result.className = "even"
+		    }else {
+		    	result.textContent = did_win ? "You Win !" : "You Lose.";
+		    	result.className   = did_win ? "win" : "lose";
+		    }
+		    
+		    
+
+		    if (scores) {
+		        scoresDiv.innerHTML = scores; 
+		    }
+
+		    overlay.classList.add("visible");
+		}
+
+		socket.on("game_over", (data) => {
+		    show_end_screen(
+		        data.winner_id === {{ session["user_id"] }},
+		        data.scores ?? null,
+		        data.is_even
+		    );
+		});
+
+
 
 		document.addEventListener('DOMContentLoaded', () => {
 		    document.getElementById('quit-btn').addEventListener('click', () => {
@@ -329,6 +365,8 @@
 
 			socket.emit("ask_opponent_hand");
 
+
+
 			
 		});
 	</script>
@@ -356,4 +394,16 @@
 	        <button id="msg-btn" type="submit">Send</button>
 	    </div>
 	</div>
+	<div id="blur-overlay" class="visible">
+	    <span id="overlay-text">Waiting for opponent.</span>
+	    <span id="overlay-code">Room Code : <strong>{{ session["room"] }}</strong></span>
+	    <button onclick="socket.emit('leave')" id="overlay-quit-btn">Cancel</button>
+	</div>
+	<div id="end-overlay">
+    <div id="end-modal">
+        <div id="end-result">You Win !</div>
+        <div id="end-scores"></div>
+        <button onclick="window.location.href='/quit_room'">Back to lobby</button>
+    </div>
+</div>
 {% endblock %}
