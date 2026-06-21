@@ -1,0 +1,17 @@
+{
+	"login" : { 
+		"login" : "Se connecter",
+		"welcome" : "Bienvenue",
+		"welcome_phrase" : "Ravi de vous revoir.",
+		"email" : "E-mail",
+		"email_placeholder" : "vous@exemple.be",
+		"password" : "Mot de passe",
+		"create_an_account" : "Créer un compte",
+		"create_an_account_placeholder" : "Rejoins-nous !",
+		"username" : "Pseudo",
+		"username_placeholder" : "Pseudo",
+		"register" : "S'enregistrer",
+		"logout" : "Se déconnecter",
+		"join" : "Rejoindre une partie"
+	}
+} 

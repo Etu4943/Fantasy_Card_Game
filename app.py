@@ -151,7 +151,7 @@ def set_lang(lang):
     return redirect(request.referrer or '/')
 
 def get_translations(lang):
-    path = os.path.join(app.root_path, 'locales', lang, 'login.json')
+    path = os.path.join(app.root_path, 'locales', lang, 'translation.json')
     with open(path, encoding='utf-8') as f:
         return json.load(f)
 
