@@ -6,9 +6,12 @@
 
 {% block head %}
 	<link rel="stylesheet" href="{{ url_for('static', filename='CSS/chat.css')}}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='CSS/game.css')}}">
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 	<script>
 	    var socket = io();
+	    let can_steal = false; /*Not a big deal that is client-side, because it only manage the front-end highlight, not the backend*/
+
 	    socket.on('connect', () => {
 	        socket.emit('join', { room_code: "{{ room_code }}" });
 	    });
@@ -43,13 +46,297 @@
 			com_box.appendChild(new_node)
 
 			com_box.scrollTop = com_box.scrollHeight
+
+			if (!document.getElementById('chat-panel').classList.contains('open')){
+				document.getElementById('chat-badge').classList.add("visible")
+			};
 		})
+
+
 
 		function send_message(){
 			let msg_input = document.getElementById("msg");
 			let msg_content = msg_input.value;
 			msg_input.value = "";
 			socket.emit('send_message', {'message': msg_content});
+		}
+
+		/*socket.on('board', (board) => {
+			let board_div = document.getElementById("player-play")
+			board_div.innerHTML = ""
+
+			for (card of board) {
+				let new_node = document.createElement("div");
+				new_node.classList.add("card")
+				new_node.style.backgroundImage = `url('/static/Assets/Cards/${card.name}.png')`;
+				new_node.id = card["id"];
+				board_div.append(new_node);
+			}
+		})*/
+
+		socket.on('board', (board) => {
+		    let board_div = document.getElementById("player-play");
+		    board_div.innerHTML = "";
+
+		    // Regroupe les cartes par nom, en créant un nouveau groupe après 3 cartes
+		    let groups = [];
+		    let current_group = null;
+
+		    for (let card of board) {
+		        if (!current_group || current_group.name !== card.name || current_group.cards.length >= 3) {
+		            current_group = { name: card.name, cards: [] };
+		            groups.push(current_group);
+		        }
+		        current_group.cards.push(card);
+		    }
+
+		    // Affiche chaque groupe comme un paquet empilé
+		    for (let group of groups) {
+		        let stack = document.createElement("div");
+		        stack.classList.add("card-stack");
+
+		        group.cards.forEach((card, i) => {
+		            let new_node = document.createElement("div");
+		            new_node.classList.add("card", "stacked-card");
+		            new_node.style.backgroundImage = `url('/static/Assets/Cards/${card.name}.png')`;
+		            new_node.style.setProperty('--stack-index', i);
+		            new_node.id = card["id"];
+		            stack.appendChild(new_node);
+		        });
+
+		        board_div.appendChild(stack);
+		    }
+		});
+
+		socket.on('wait', (data) => {
+			window.location.href = data.url;
+		});
+
+		socket.on('opponent_board', (board) => {
+		    let opponent_board_div = document.getElementById("opponent-play");
+		    opponent_board_div.innerHTML = "";
+
+		    // Regroupe les cartes par nom, en créant un nouveau groupe après 3 cartes
+		    let groups = [];
+		    let current_group = null;
+
+		    for (let card of board) {
+		        if (!current_group || current_group.name !== card.name || current_group.cards.length >= 3) {
+		            current_group = { name: card.name, cards: [] };
+		            groups.push(current_group);
+		        }
+		        current_group.cards.push(card);
+		    }
+
+		    // Affiche chaque groupe comme un paquet empilé
+		    for (let group of groups) {
+		        let stack = document.createElement("div");
+		        stack.classList.add("card-stack");
+
+		        group.cards.forEach((card, i) => {
+		            let new_node = document.createElement("div");
+		            new_node.classList.add("card", "stacked-card", "opponent-play");
+		            new_node.style.backgroundImage = `url('/static/Assets/Cards/${card.name}.png')`;
+		            new_node.style.setProperty('--stack-index', i);
+		            new_node.id = card["id"];
+		            stack.appendChild(new_node);
+		        });
+
+		        opponent_board_div.appendChild(stack);
+		    }
+		});
+
+		socket.on('hand', (hand) => {
+			let hand_div = document.getElementById("player-hand");
+			hand_div.innerHTML = "";
+		    for (card of hand) {
+		    	let new_node = document.createElement("div");
+		    	new_node.classList.add("card");
+		    	new_node.style.backgroundImage = `url('/static/Assets/Cards/${card.name}.png')`;
+		    	new_node.id = card["id"];
+		    	hand_div.appendChild(new_node);
+
+		    }
+		    	
+
+		});
+
+		socket.on("opponent_hand", (cards) => {
+			let opponent_box = document.getElementById("opponent-hand");
+			console.log("Try to display opponent hand")
+			
+			opponent_box.innerHTML = "";
+
+			for (card of cards) {
+				let new_node = document.createElement("div");
+				new_node.classList.add("card")
+				new_node.classList.add("opponent")
+				new_node.id = card["id"]
+				new_node.style.backgroundImage = "url('/static/Assets/back_card.png')";
+		    	opponent_box.appendChild(new_node);
+		    	if (can_steal){
+		    		new_node.classList.add("highlighted");
+		    	}
+			}
+
+			
+		});
+
+		socket.on("redraw_hand", () => {
+			socket.emit("ask_hand")
+		});
+
+		socket.on("redraw_board", () => {
+			socket.emit("ask_board")
+		});
+
+		socket.on("empty_deck", () => {
+			document.getElementById("draw").remove()
+		});
+
+		socket.on("set_round", (current_id) => {
+			let node = document.getElementById("turn-text");
+			let text = ""
+			if (current_id == {{ session["user_id"] }}){
+				text = "Your turn"
+			}else{
+				text = "Opponent's turn"
+			}
+
+			node.innerHTML = text;
+		});
+
+		function on_board_click(e){
+			let card = e.target.closest('.card');
+		    if (!card) return;
+		    let card_id = card.id
+			disable_highlighted_board()
+		    socket.emit("play", {"card_id" : card.id, 'is_from_elfe':true});
+		}
+
+		function on_hand_click(e){
+			let card = e.target.closest('.card');
+		    if (!card) return; // clic en dehors d'une carte, on ignore
+		    
+		    let card_id = card.id
+		    socket.emit("play", {"card_id":card_id, "is_from_elfe":false});
+		}
+
+		function disable_highlighted_board(){
+			let player_board = document.getElementById("player-play");
+			for (stack of player_board.children){
+				stack.removeEventListener('click', on_board_click);
+				for (card of stack.children){
+					card.classList.remove("highlighted");
+				}
+			}
+		}
+		function highlight_board() {
+			let player_board = document.getElementById("player-play");
+			for (stack of player_board.children){
+				stack.addEventListener('click', on_board_click);
+				for (card of stack.children){
+					card.classList.add("highlighted");
+				}
+			}
+		}
+
+		function on_opponent_board_click(e){
+			let card = e.target.closest('.card');
+		    if (!card) return;
+		    let card_id = card.id
+		    socket.emit("steal_card_from_board", {"card_id" : card.id});
+		}
+
+		function highlight_opponent_board() {
+			let opponent_board = document.getElementById("opponent-play");
+			for (stack of opponent_board.children){
+				stack.addEventListener('click', on_opponent_board_click);
+				for (card of stack.children){
+					card.classList.toggle("highlighted");
+				}
+			}
+
+		}
+
+		function on_opponent_hand_click(e){
+			let card = e.target.closest('.card');
+		    if (!card) return;
+		    let card_id = card.id
+		    socket.emit("steal_card_from_hand", {"card_id" : card.id});
+		}
+
+		function highlight_opponent_hand(){
+			can_steal = true;
+			document.querySelectorAll('#opponent-hand .card').forEach(card => {
+		        card.classList.add('highlighted');
+		    });
+			document.getElementById('opponent-hand').addEventListener('click', on_opponent_hand_click);
+		}
+
+		socket.on("disable_opponent_hand_steal", () => {
+			can_steal = false;
+			document.getElementById('opponent-hand').removeEventListener('click', on_opponent_hand_click);
+		});
+
+
+
+		socket.on("highlight_board", () => {
+			highlight_board();
+		});
+
+		socket.on("highlight_opponent_board", () => {
+			highlight_opponent_board();
+		});
+
+		socket.on("highlight_opponent_hand", () => {
+
+			highlight_opponent_hand();
+		});
+
+		socket.on("deblur",() => {
+			document.getElementById("blur-overlay").classList.remove("visible");
+		})
+
+
+		function show_end_screen(did_win, scores, is_even) {
+		    let overlay = document.getElementById("end-overlay");
+		    let result  = document.getElementById("end-result");
+		    let scoresDiv = document.getElementById("end-scores");
+
+		    if (is_even){
+		    	result.textContent = "Even !"
+		    	result.className = "even"
+		    }else {
+		    	result.textContent = did_win ? "You Win !" : "You Lose.";
+		    	result.className   = did_win ? "win" : "lose";
+		    }
+		    
+		    
+
+		    if (scores) {
+		        scoresDiv.innerHTML = scores; 
+		    }
+
+		    overlay.classList.add("visible");
+		}
+
+		socket.on("game_over", (data) => {
+		    show_end_screen(
+		        data.winner_id === {{ session["user_id"] }},
+		        data.scores ?? null,
+		        data.is_even
+		    );
+		});
+
+		socket.on("highlight_deck", () => {
+			highlight_deck();
+			document.getElementById('player-hand').removeEventListener('click', on_hand_click);
+		});
+
+		function highlight_deck(){
+			document.getElementById('draw').classList.toggle("highlighted");
+
 		}
 
 		document.addEventListener('DOMContentLoaded', () => {
@@ -61,6 +348,9 @@
 
 			document.getElementById('chat-toggle').addEventListener('click', () => {
 			    document.getElementById('chat-panel').classList.toggle('open');
+			    if (document.getElementById('chat-panel').classList.contains('open')){
+					document.getElementById('chat-badge').classList.remove("visible")
+				};
 			});
 
 			document.getElementById('msg-btn').addEventListener('click', () => {
@@ -72,17 +362,55 @@
 			        send_message();
 			    }
 			});
+
+			socket.emit("ask_hand");
+
+			
+
+			document.getElementById('draw').addEventListener('click', () => {
+				highlight_deck();
+			    socket.emit('draw_a_card');
+			    document.getElementById('player-hand').addEventListener('click', on_hand_click);
+			});
+
+			socket.emit("ask_opponent_hand");
+
 		});
 	</script>
 {% endblock %}
 
 {% block content %}
+	<div id="turn-indicator">
+	    <span id="turn-text">Wait for opponent ...</span>
+	</div>
+	<div id="game-board">
+	    <div id="opponent-hand" class="card-zone"></div>
+	    <div id="opponent-play" class="card-zone"></div>
+	    <div id="draw-pile" class="card-zone"><div class="card" id="draw"></div></div>
+	    <div id="player-play" class="card-zone"></div>
+	    <div id="player-hand" class="card-zone"></div>
+	</div>
 	<div id="chat-panel">
-	    <button id="chat-toggle">Chat</button>
+	    <button id="chat-toggle">
+	    	Chat
+	    	<span id="chat-badge" class="badge"></span>
+	    </button>
 	    <div id="com-box"></div>
 	    <div class="chat-input">
 	        <input type="text" id="msg" placeholder="Message ..." autocomplete="off">
 	        <button id="msg-btn" type="submit">Send</button>
 	    </div>
 	</div>
+	<div id="blur-overlay" class="visible">
+	    <span id="overlay-text">Waiting for opponent.</span>
+	    <span id="overlay-code">Room Code : <strong>{{ session["room"] }}</strong></span>
+	    <button onclick="socket.emit('leave')" id="overlay-quit-btn">Cancel</button>
+	</div>
+	<div id="end-overlay">
+    <div id="end-modal">
+        <div id="end-result">You Win !</div>
+        <div id="end-scores"></div>
+        <button onclick="window.location.href='/quit_room'">Back to lobby</button>
+    </div>
+</div>
 {% endblock %}

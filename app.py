@@ -5,7 +5,6 @@ import sqlite3
 import fsocket
 
 from state import ROOMS
-
 from random import randint
 
 from functools import wraps
@@ -108,6 +107,7 @@ def join():
 		elif len(ROOMS[room_sequence]['players']) == MAX_PLAYERS :
 			return render_template("error.html", err=f"This room is already full !")
 		else :
+
 			return join_a_room(room_sequence)
 
 @app.route("/create_room", methods=["POST"])
