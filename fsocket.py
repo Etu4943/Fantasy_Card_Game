@@ -269,7 +269,7 @@ def hand_play(data):
         return
 
     room_code, user_id = entry
-
+    opponent_id = get_opponent_id(room_code, user_id)
     if is_from_elfe :
         if data["card_id"] not in [card["id"] for card in board[room_code][user_id]] :
             diffuse_message({"user": "system", "message":"CAUGHT CHEATING !"})
@@ -308,7 +308,7 @@ def hand_play(data):
 
 
     elif selected_card["name"] == "elfe" :
-        if len(board[room_code][user_id]) != 1 :
+        if len([ card for card in board[room_code][user_id] if card["name"] != "elfe"]) != 0 :
             # If there is no card on board to replay
             # 1 because the elfe card is already "played" on backend 
             highlight_board(request.sid)
@@ -317,8 +317,11 @@ def hand_play(data):
             pass
 
     elif selected_card["name"] == "dryade":
-        highlight_opponent_board(request.sid)
-        return
+        if len(board[room_code][opponent_id]) != 0 :
+            highlight_opponent_board(request.sid)
+            return
+        else :
+            pass
 
     elif selected_card["name"] == "korrigan":
         card_to_steal[room_code][user_id] = 2
@@ -330,7 +333,7 @@ def hand_play(data):
         # For opponent's visual :
         emit("redraw_hand", room=room_code, include_self=False)
         emit("redraw_board", room=room_code, include_self=False)
-    
+
         highlight_opponent_hand(request.sid)
         return
 
