@@ -1,5 +1,5 @@
 from extensions import socketio
-from state import ROOMS, sid_to_room, hand, deck, board, player_round, card_to_steal
+from state import ROOMS, sid_to_room, hand, deck, board, player_round, card_to_steal, last_action
 
 from flask import request, session, redirect
 from flask_socketio import join_room, leave_room, send, SocketIO, emit
@@ -50,6 +50,8 @@ def handle_join(data):
         board[room_code] = dict()
         hand[room_code] = dict()
         card_to_steal[room_code] = dict()
+        last_action[room_code] = dict()
+        last_action[room_code]["cards"] = []
     card_to_steal[room_code][user_id] = 0
 
     if len(ROOMS[room_code]["players"]) == 1 :
@@ -294,12 +296,13 @@ def hand_play(data):
         board[room_code][user_id].append(selected_card)
 
     if selected_card["name"] == "lutin" :
-        opponent_id = get_opponent_id(room_code, user_id)
+        last_action[room_code]["name"] = "lutin"
         hand[room_code][user_id], hand[room_code][opponent_id] = hand[room_code][opponent_id],hand[room_code][user_id]
 
     elif selected_card["name"] == "farfadet" :
-        opponent_id = get_opponent_id(room_code, user_id)
+        last_action[room_code]["name"] = "farfadet"
         board[room_code][user_id],board[room_code][opponent_id] = board[room_code][opponent_id],board[room_code][user_id]
+        last_action[room_code]["name"] = "farfadet"
 
     elif selected_card["name"] == "gnome" :
         for _ in range(2) :
@@ -318,12 +321,41 @@ def hand_play(data):
 
     elif selected_card["name"] == "dryade":
         if len(board[room_code][opponent_id]) != 0 :
+            last_action[room_code]["name"] = "dryade"
             highlight_opponent_board(request.sid)
             return
         else :
             pass
 
+    elif selected_card["name"] == "fee":
+        if len(last_action[room_code]) == 0 :
+            pass
+            last_action[room_code] = dict()
+        else :
+            name = last_action[room_code]["name"]
+
+            if name == "farfadet" :
+                board[room_code][user_id].remove(selected_card)
+                board[room_code][user_id], board[room_code][opponent_id] = board[room_code][opponent_id], board[room_code][user_id]
+                board[room_code][user_id].append(selected_card) # Because in real life, you "refuse" the action by putting this in your board
+            elif name == "lutin" :
+                hand[room_code][user_id], hand[room_code][opponent_id] = hand[room_code][opponent_id], hand[room_code][user_id]
+            elif name == "dryade" :
+                for card in last_action[room_code]["cards"] :
+                    board[room_code][opponent_id].remove(card) 
+                    board[room_code][user_id].append(card)
+            elif name == "korrigan" :
+                for card in last_action[room_code]["cards"] :
+                    hand[room_code][opponent_id].remove(card)
+                    hand[room_code][user_id].append(card)
+            last_action[room_code] = dict()
+            last_action[room_code]["cards"] = []
+
+
+            
+
     elif selected_card["name"] == "korrigan":
+        last_action[room_code]["name"] = "korrigan"
         card_to_steal[room_code][user_id] = 2
 
         # For current user's visual :
@@ -368,6 +400,8 @@ def steal_card_from_board(data):
     board[room_code][opponent_id].remove(selected_card)
     board[room_code][user_id].append(selected_card)
 
+    last_action[room_code]["cards"].append(selected_card)
+
     """
         Maybe try to encapsulate the "refresh" system ?
     """
@@ -404,6 +438,8 @@ def steal_card_from_hand(data):
 
     hand[room_code][opponent_id].remove(selected_card)
     hand[room_code][user_id].append(selected_card)
+
+    last_action[room_code]["cards"].append(selected_card)
 
     card_to_steal[room_code][user_id] -= 1
 
