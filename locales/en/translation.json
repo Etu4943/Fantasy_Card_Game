@@ -14,7 +14,11 @@
 		"logout" : "Logout"
 	},
 
-	"base" :{
+	"base" : {
 		"join" : "Join"
+	},
+
+	"room" : {
+		"opponent_disconnect" : "Opponent disconnected ..."
 	}
 } 

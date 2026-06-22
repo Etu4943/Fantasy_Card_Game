@@ -16,5 +16,9 @@
 
 	"base" : {
 		"join" : "Rejoindre une partie"
+	},
+
+	"room" : {
+		"opponent_disconnect" : "L'adversaire s'est déconnecté ..."
 	}
 } 

@@ -26,6 +26,16 @@ def handle_message(data):
 def handle_join(data):
     room_code = data.get('room_code')
     user_id = session.get('user_id')
+    # If the user quit and reconnect
+    if user_id in ROOMS[room_code]["players"]:
+        print("He returned !!")
+        join_room(room_code)
+        sid_to_room[request.sid] = (room_code, user_id) # Doesn't remove the old sid btw
+        diffuse_hand()
+        diffuse_board()
+        # toggle_round_player(room_code, user_id)
+        return
+
     if room_code not in ROOMS.keys() :
         session['room'] = None
         return redirect("/")
@@ -37,6 +47,8 @@ def handle_join(data):
         diffuse_hand()          # restitue sa main sans réinitialiser
         return
 
+
+
     join_room(room_code)
 
     ROOMS[room_code]["players"].add(user_id)
@@ -44,8 +56,8 @@ def handle_join(data):
     
 
 
+
     # Quand tu rejoins une partie, il faut lui créer et lui attribuer une main
-    
     if room_code not in hand.keys() :
         board[room_code] = dict()
         hand[room_code] = dict()
@@ -135,6 +147,8 @@ def remove_player(room_code, user_id):
             del hand[room_code]
             del player_round[room_code]
             del ROOMS[room_code]
+        else :
+            socketio.emit('opponent_disconnected', room=room_code)
 
 
 @socketio.on('send_message')

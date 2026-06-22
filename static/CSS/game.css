@@ -221,17 +221,24 @@
     -webkit-backdrop-filter: blur(6px);
     background: rgba(0, 0, 0, 0.4);
     z-index: 999;
-    display: none;
+    display: flex;          /* toujours flex, plus de display:none */
     align-items: center;
     justify-content: center;
     color: white;
     font-size: 2rem;
     flex-direction: column;
     gap: 0.5rem;
+
+    opacity: 0;
+    visibility: hidden;     /* ← remplace display:none */
+    pointer-events: none;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
 }
 
 #blur-overlay.visible {
-    display: flex;
+    opacity: 1;
+    visibility: visible;    /* ← remplace display:flex */
+    pointer-events: auto;
 }
 
 #overlay-quit-btn {
@@ -251,6 +258,7 @@
 #overlay-quit-btn:hover {
     background: rgba(255, 255, 255, 0.1);
 }
+
 
 /* ── End Game Overlay ── */
 #end-overlay {

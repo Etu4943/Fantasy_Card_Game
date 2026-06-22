@@ -11,7 +11,7 @@
 	<script>
 	    var socket = io();
 	    let can_steal = false; /*Not a big deal that is client-side, because it only manage the front-end highlight, not the backend*/
-
+	    const T = {{ t | tojson }}; /* Solution proposed by claude in order to deal with utf-8 */
 	    socket.on('connect', () => {
 	        socket.emit('join', { room_code: "{{ room_code }}" });
 	    });
@@ -299,6 +299,13 @@
 		})
 
 
+		function blur(message){
+			document.getElementById("blur-overlay").classList.add("visible");
+
+			document.getElementById("overlay-text").textContent = message;
+		}
+
+
 		function show_end_screen(did_win, scores, is_even) {
 		    let overlay = document.getElementById("end-overlay");
 		    let result  = document.getElementById("end-result");
@@ -338,6 +345,10 @@
 			document.getElementById('draw').classList.toggle("highlighted");
 
 		}
+
+		socket.on('opponent_disconnected', () => {
+		    blur(T.room.opponent_disconnect);
+		});
 
 		document.addEventListener('DOMContentLoaded', () => {
 		    document.getElementById('quit-btn').addEventListener('click', () => {
