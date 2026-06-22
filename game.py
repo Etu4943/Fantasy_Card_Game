@@ -25,8 +25,10 @@ def init_deck(room_code):
 		deck[room_code].append(Card("dryade", "Pouvoir 2", str(uuid.uuid4())))
 	for _ in range(NB_PEOPLE):
 		deck[room_code].append(Card("elfe", "Pouvoir 3", str(uuid.uuid4())))
-	for _ in range(NB_PEOPLE):
-		deck[room_code].append(Card("fee", "Pouvoir 4", str(uuid.uuid4())))
+	# Fee disabled until I found a better architecture 
+	# Like I need to be able to play it while the opponent is playing
+	# for _ in range(NB_PEOPLE):
+	# 	deck[room_code].append(Card("fee", "Pouvoir 4", str(uuid.uuid4())))
 	for _ in range(NB_PEOPLE):
 		deck[room_code].append(Card("gnome", "Pouvoir 5", str(uuid.uuid4())))
 	for _ in range(NB_PEOPLE):

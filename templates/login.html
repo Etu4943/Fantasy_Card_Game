@@ -107,22 +107,26 @@
 </main>
 
 <script>
-  const tabs = document.login.querySelectorAll('.tab-btn');
-  const panelEls = document.login.querySelectorAll('.tab-panel');
-  const slider = document.login.querySelector('.tab-slider');
- 
-  function switchTab(tabName) {
-    tabs.forEach(t => t.login.classList.login.toggle('active', t.login.dataset.login.tab === tabName));
-    panelEls.forEach(p => p.classList.login.toggle('active', p.id === 'm-' + tabName));
-    slider.style.transform = tabName === 'login' ? 'translateX(0)' : 'translateX(100%)';
-  }
- 
-  // Actif au chargement
-  document.login.getElementById('m-login').classList.login.add('active');
- 
-  tabs.forEach(btn => {
-    btn.addEventListener('click', () => switchTab(btn.dataset.login.tab));
+  document.addEventListener('DOMContentLoaded', () => {
+    const tabs = document.login.querySelectorAll('.tab-btn');
+    const panelEls = document.login.querySelectorAll('.tab-panel');
+    const slider = document.login.querySelector('.tab-slider');
+   
+    function switchTab(tabName) {
+      tabs.forEach(t => t.login.classList.login.toggle('active', t.login.dataset.login.tab === tabName));
+      panelEls.forEach(p => p.classList.login.toggle('active', p.id === 'm-' + tabName));
+      slider.style.transform = tabName === 'login' ? 'translateX(0)' : 'translateX(100%)';
+    }
+   
+    // Actif au chargement
+    document.login.getElementById('m-login').classList.login.add('active');
+   
+    tabs.forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.login.tab));
+    });
+
   });
+  
 </script>
 
 

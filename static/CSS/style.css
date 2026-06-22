@@ -155,3 +155,16 @@
 .lang-menu.open {
     display: block;
 }
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-username {
+  font-size: 13px;
+  font-weight: 500;
+  color: #111;
+  letter-spacing: -0.01em;
+}

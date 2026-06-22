@@ -11,7 +11,10 @@
 		"username" : "Username",
 		"username_placeholder" : "Username",
 		"register" : "Register",
-		"logout" : "Logout",
+		"logout" : "Logout"
+	},
+
+	"base" :{
 		"join" : "Join"
 	}
 } 

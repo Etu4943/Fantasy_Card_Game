@@ -11,7 +11,10 @@
 		"username" : "Pseudo",
 		"username_placeholder" : "Pseudo",
 		"register" : "S'enregistrer",
-		"logout" : "Se déconnecter",
+		"logout" : "Se déconnecter"
+	},
+
+	"base" : {
 		"join" : "Rejoindre une partie"
 	}
 } 
