@@ -353,6 +353,15 @@
 		    blur(T.room.opponent_disconnect);
 		});
 
+		socket.on('display_last_card', (card_name) => {
+			let card_box = document.getElementById("last-card-display");
+			card_box.innerHTML = ""
+			let new_node = document.createElement("div");
+			new_node.classList.add("card")
+			new_node.style.backgroundImage = `url('/static/Assets/Cards/${card_name}.png')`;
+	    	card_box.appendChild(new_node);
+		});
+
 		document.addEventListener('DOMContentLoaded', () => {
 		    document.getElementById('quit-btn').addEventListener('click', () => {
 			    socket.emit('leave');
@@ -382,7 +391,7 @@
 			
 
 			document.getElementById('draw').addEventListener('click', () => {
-				disable_highlight_deck();
+				highlight_deck();
 			    socket.emit('draw_a_card');
 			    document.getElementById('player-hand').addEventListener('click', on_hand_click);
 			});
@@ -400,7 +409,13 @@
 	<div id="game-board">
 	    <div id="opponent-hand" class="card-zone"></div>
 	    <div id="opponent-play" class="card-zone"></div>
-	    <div id="draw-pile" class="card-zone"><div class="card" id="draw"></div></div>
+	    <div id="draw-pile" class="card-zone">
+	    	<div class="card" id="draw"></div>
+	    </div>
+	    <div id="last-card-pile" class="card-zone">
+		    <span id="last-card-label">Last played</span>
+		    <div id="last-card-display"></div>
+		</div>
 	    <div id="player-play" class="card-zone"></div>
 	    <div id="player-hand" class="card-zone"></div>
 	</div>

@@ -324,6 +324,7 @@ def hand_play(data):
         selected_card = [card for card in board[room_code][user_id] if card["id"] == card_id][0]
     else :
         selected_card = [card for card in hand[room_code][user_id] if card["id"] == card_id][0]
+        emit("display_last_card", selected_card["name"], room=room_code)
 
     if not data["is_from_elfe"] :
         hand[room_code][user_id].remove(selected_card)
@@ -400,6 +401,7 @@ def hand_play(data):
 
         highlight_opponent_hand(request.sid)
         return
+
 
     # For current user's visual :
     diffuse_hand(request.sid)
