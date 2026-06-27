@@ -78,6 +78,7 @@ def handle_join(data):
         player_round[room_code] = cycle([-2,-1]) # can't play while there isn't a second player
     else :
         player_round[room_code] = cycle(ROOMS[room_code]["players"])
+        toggle_round_player(room_code, user_id)
         for _ in range(random.randint(1, 10)) :
             ROOMS[room_code]["current_player_id"] = next(player_round[room_code]) # Here is the randomization
         # Here is the beginning of the game.
@@ -86,7 +87,7 @@ def handle_join(data):
             emit("highlight_deck", to=request.sid)
         else :
             emit("highlight_deck", room=room_code, include_self=False)
-        toggle_round_player(room_code, user_id)
+        
 
     hand[room_code][user_id] = []
     board[room_code][user_id] = []
