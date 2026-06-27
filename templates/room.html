@@ -194,11 +194,23 @@
 			document.getElementById("draw").remove()
 		});
 
+		function on_deck_click(e){
+			let hand = document.getElementById("player-hand")
+			e.target.classList.remove("highlighted");
+			socket.emit('draw_a_card')
+			hand.addEventListener('click', on_hand_click);
+		}
+
 		socket.on("set_round", (current_id) => {
 			let node = document.getElementById("turn-text");
+			let deck = document.getElementById("draw");
+			let hand = document.getElementById("player-hand");
+			hand.removeEventListener('click', on_hand_click);
 			let text = ""
 			if (current_id == {{ session["user_id"] }}){
-				text = "Your turn"
+				text = "Your turn";
+				deck.classList.add("highlighted");
+				deck.addEventListener('click', on_deck_click, {once:true});
 			}else{
 				text = "Opponent's turn"
 			}
@@ -336,18 +348,6 @@
 		    );
 		});
 
-		socket.on("highlight_deck", () => {
-			highlight_deck();
-			document.getElementById('player-hand').removeEventListener('click', on_hand_click);
-		});
-
-		function highlight_deck(){
-			document.getElementById('draw').classList.add("highlighted");
-		}
-
-		function disable_highlight_deck(){
-			document.getElementById('draw').classList.remove("highlighted");
-		}
 
 		socket.on('opponent_disconnected', () => {
 		    blur(T.room.opponent_disconnect);
@@ -387,15 +387,6 @@
 			});
 
 			socket.emit("ask_hand");
-
-			
-
-			document.getElementById('draw').addEventListener('click', () => {
-				highlight_deck();
-			    socket.emit('draw_a_card');
-			    document.getElementById('player-hand').addEventListener('click', on_hand_click);
-			});
-
 			socket.emit("ask_opponent_hand");
 
 		});

@@ -83,10 +83,10 @@ def handle_join(data):
             ROOMS[room_code]["current_player_id"] = next(player_round[room_code]) # Here is the randomization
         # Here is the beginning of the game.
         emit("deblur", room=room_code)
-        if ROOMS[room_code]["current_player_id"] == user_id :
-            emit("highlight_deck", to=request.sid)
-        else :
-            emit("highlight_deck", room=room_code, include_self=False)
+        # if ROOMS[room_code]["current_player_id"] == user_id :
+        #     emit("highlight_deck", to=request.sid)
+        # else :
+        #     emit("highlight_deck", room=room_code, include_self=False)
         
 
     hand[room_code][user_id] = []
@@ -413,8 +413,8 @@ def hand_play(data):
 
     toggle_round_player(room_code, user_id)
 
-    if len(deck[room_code]) > 0 :
-        emit("highlight_deck", room=room_code, include_self=False)
+    # if len(deck[room_code]) > 0 :
+    #     emit("highlight_deck", room=room_code, include_self=False)
 
     if len(deck[room_code]) == 0 and len(hand[room_code][opponent_id]) == 0 :
         finish(room_code, user_id, opponent_id)
@@ -465,8 +465,8 @@ def steal_card_from_board(data):
 
     toggle_round_player(room_code, user_id)
 
-    if len(deck[room_code]) > 0 :
-        emit("highlight_deck", room=room_code, include_self=False)
+    # if len(deck[room_code]) > 0 :
+    #     emit("highlight_deck", room=room_code, include_self=False)
 
     if len(deck[room_code]) == 0 and len(hand[room_code][opponent_id]) == 0 :
         finish(room_code, user_id, opponent_id)
@@ -506,8 +506,8 @@ def steal_card_from_hand(data):
         emit("redraw_hand", room=room_code, include_self=False)
         emit("redraw_board", room=room_code, include_self=False)
 
-        if len(deck[room_code]) > 0 :
-            emit("highlight_deck", room=room_code, include_self=False)
+        # if len(deck[room_code]) > 0 :
+        #     emit("highlight_deck", room=room_code, include_self=False)
 
         toggle_round_player(room_code, user_id)
         emit("disable_opponent_hand_steal", to=request.sid)
