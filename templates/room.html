@@ -11,7 +11,7 @@
 	<script>
 	    var socket = io();
 	    let can_steal = false; /*Not a big deal that is client-side, because it only manage the front-end highlight, not the backend*/
-	    const T = {{ t | tojson }}; /* Solution proposed by claude in order to deal with utf-8 */
+	    const T = {{ t | tojson }}; /* Solution proposed by claude in order to deal with utf-8*/
 	    socket.on('connect', () => {
 	        socket.emit('join', { room_code: "{{ room_code }}" });
 	    });
@@ -342,8 +342,11 @@
 		});
 
 		function highlight_deck(){
-			document.getElementById('draw').classList.toggle("highlighted");
+			document.getElementById('draw').classList.add("highlighted");
+		}
 
+		function disable_highlight_deck(){
+			document.getElementById('draw').classList.remove("highlighted");
 		}
 
 		socket.on('opponent_disconnected', () => {
@@ -379,7 +382,7 @@
 			
 
 			document.getElementById('draw').addEventListener('click', () => {
-				highlight_deck();
+				disable_highlight_deck();
 			    socket.emit('draw_a_card');
 			    document.getElementById('player-hand').addEventListener('click', on_hand_click);
 			});

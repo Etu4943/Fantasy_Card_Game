@@ -27,18 +27,25 @@ def handle_join(data):
     room_code = data.get('room_code')
     user_id = session.get('user_id')
     # If the user quit and reconnect
-    if user_id in ROOMS[room_code]["players"]:
-        print("He returned !!")
+    if room_code in hand.keys() and user_id in hand[room_code].keys():
         join_room(room_code)
+        ROOMS[room_code]["players"].add(user_id)
+        emit("deblur", room=room_code)
+        emit("set_round", ROOMS[room_code]["current_player_id"], to=request.sid)
+        print("He returned !!")
+        
         sid_to_room[request.sid] = (room_code, user_id) # Doesn't remove the old sid btw
         diffuse_hand()
         diffuse_board()
+        emit("opponent_board", sorted(board[room_code][get_opponent_id(room_code, user_id)], key=lambda d: d['name'], reverse=True), to=request.sid)
+
         # toggle_round_player(room_code, user_id)
         return
 
     if room_code not in ROOMS.keys() :
         session['room'] = None
         return redirect("/")
+
     # Annule une déco en attente pour ce joueur (= refresh)
     if user_id in _pending_disconnects:
         _pending_disconnects.pop(user_id).cancel()
@@ -90,6 +97,7 @@ def handle_join(data):
     diffuse_message({'message' : "has enter the chat"})
 
 def toggle_round_player(room_code, user_id):
+    ROOMS[room_code]["current_player_id"] = next(player_round[room_code])
     emit("set_round", ROOMS[room_code]["current_player_id"], room=room_code)
 
 
@@ -258,7 +266,13 @@ def board_for_opponent(room_code, user_id):
 
 @socketio.on("draw_a_card")
 def handle_draw_a_card():
-    print("Want to draw a card")
+    entry = sid_to_room.get(request.sid)
+    if entry is None :
+        return
+    room_code, user_id = entry
+
+    if user_id != ROOMS[room_code]["current_player_id"] :
+        return
     room_code, user_id = (session.get("room"), session.get("user_id"))
     add_card_to_hand(room_code, user_id)
     draw_card(room_code, user_id)
@@ -394,7 +408,6 @@ def hand_play(data):
     emit("redraw_hand", room=room_code, include_self=False)
     emit("redraw_board", room=room_code, include_self=False)
 
-    ROOMS[room_code]["current_player_id"] = next(player_round[room_code])
     toggle_round_player(room_code, user_id)
 
     if len(deck[room_code]) > 0 :
@@ -447,7 +460,6 @@ def steal_card_from_board(data):
     emit("redraw_hand", room=room_code, include_self=False)
     emit("redraw_board", room=room_code, include_self=False)
 
-    ROOMS[room_code]["current_player_id"] = next(player_round[room_code])
     toggle_round_player(room_code, user_id)
 
     if len(deck[room_code]) > 0 :
@@ -494,7 +506,6 @@ def steal_card_from_hand(data):
         if len(deck[room_code]) > 0 :
             emit("highlight_deck", room=room_code, include_self=False)
 
-        ROOMS[room_code]["current_player_id"] = next(player_round[room_code])
         toggle_round_player(room_code, user_id)
         emit("disable_opponent_hand_steal", to=request.sid)
 
