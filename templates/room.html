@@ -209,8 +209,12 @@
 			let text = ""
 			if (current_id == {{ session["user_id"] }}){
 				text = "Your turn";
-				deck.classList.add("highlighted");
-				deck.addEventListener('click', on_deck_click, {once:true});
+				if (deck == null){
+					hand.addEventListener('click', on_hand_click);
+				}else{
+					deck.classList.add("highlighted");
+					deck.addEventListener('click', on_deck_click, {once:true});
+				}	
 			}else{
 				text = "Opponent's turn"
 			}

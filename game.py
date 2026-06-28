@@ -5,7 +5,7 @@ from card import Card
 import random
 import uuid
 
-NB_PEOPLE = 8
+NB_PEOPLE = 4 
 NB_CARD_BY_HAND = 7
 
 def init_hand(room_code, user_id): # 7 cartes de chaque !
