@@ -425,11 +425,15 @@ def finish(room_code, user_id, opponent_id) :
 
     if user_score > opponent_score :
         winner_id = user_id
+        winner_score = user_score
+        loser_score = opponent_score
     elif user_score < opponent_score :
         winner_id = opponent_id
+        winner_score = opponent_score
+        loser_score = user_score
     else :
         winner_id = None
-    emit("game_over", {"winner_id":winner_id, "scores":f"You: {user_score} pts &nbsp;|&nbsp; Opponent: {opponent_score} pts", "is_even": winner_id==None}, room=room_code)
+    emit("game_over", {"winner_id":winner_id, "winner_score":winner_score,"loser_score":loser_score, "is_even": winner_id==None}, to=room_code)
 @socketio.on("steal_card_from_board")
 def steal_card_from_board(data):
     card_id = data["card_id"]

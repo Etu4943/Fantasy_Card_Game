@@ -322,7 +322,7 @@
 		}
 
 
-		function show_end_screen(did_win, scores, is_even) {
+		function show_end_screen(did_win, is_even, winner_score, loser_score) {
 		    let overlay = document.getElementById("end-overlay");
 		    let result  = document.getElementById("end-result");
 		    let scoresDiv = document.getElementById("end-scores");
@@ -337,8 +337,13 @@
 		    
 		    
 
-		    if (scores) {
-		        scoresDiv.innerHTML = scores; 
+		    if (!is_even) {
+		    	if (did_win){
+		    		scoresDiv.innerHTML = `You  : ${winner_score} pts &nbsp;|&nbsp; Opponent : ${loser_score} pts`;
+		    	}else{
+		    		scoresDiv.innerHTML = `You  : ${loser_score} pts &nbsp;|&nbsp; Opponent : ${winner_score} pts`;
+		    	}
+		         
 		    }
 
 		    overlay.classList.add("visible");
@@ -347,8 +352,9 @@
 		socket.on("game_over", (data) => {
 		    show_end_screen(
 		        data.winner_id === {{ session["user_id"] }},
-		        data.scores ?? null,
-		        data.is_even
+		        data.is_even,
+		        data.winner_score,
+		        data.loser_score
 		    );
 		});
 
