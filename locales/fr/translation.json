@@ -21,6 +21,14 @@
 	},
 
 	"room" : {
-		"opponent_disconnect" : "L'adversaire s'est déconnecté ..."
+		"opponent_disconnect" : "L'adversaire s'est déconnecté ...",
+		"waiting_for_opponent" : "En attente d'un adversaire",
+		"your_turn" : "A toi de jouer",
+		"opponent_turn" : "Au tour de l'adversaire"
+	},
+
+	"join" : {
+		"create_room" : "Créer une partie",
+		"join" : "Rejoindre"
 	}
 } 

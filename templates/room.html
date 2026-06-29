@@ -208,7 +208,7 @@
 			hand.removeEventListener('click', on_hand_click);
 			let text = ""
 			if (current_id == {{ session["user_id"] }}){
-				text = "Your turn";
+				text = T.room.your_turn;
 				if (deck == null){
 					hand.addEventListener('click', on_hand_click);
 				}else{
@@ -216,7 +216,7 @@
 					deck.addEventListener('click', on_deck_click, {once:true});
 				}	
 			}else{
-				text = "Opponent's turn"
+				text = T.room.opponent_turn;
 			}
 
 			node.innerHTML = text;
@@ -413,7 +413,7 @@
 
 {% block content %}
 	<div id="turn-indicator">
-	    <span id="turn-text">Wait for opponent ...</span>
+	    <span id="turn-text">{{ t.room.wait_for_opponent }}</span>
 	</div>
 	<div id="game-board">
 	    <div id="opponent-hand" class="card-zone"></div>
@@ -440,7 +440,7 @@
 	    </div>
 	</div>
 	<div id="blur-overlay" class="">
-	    <span id="overlay-text">Waiting for opponent.</span>
+	    <span id="overlay-text">{{ t.room.waiting_for_opponent }}</span>
 	    <span id="overlay-code">Room Code : <strong>{{ session["room"] }}</strong></span>
 	    <button onclick="socket.emit('leave')" id="overlay-quit-btn">Cancel</button>
 	</div>

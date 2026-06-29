@@ -18,7 +18,7 @@
       <form class="join-form" action="join" method="POST">
         <div class="input-row">
           <input type="text" name="room_sequence" placeholder="Room code" autocomplete="off" required>
-          <button type="submit" class="btn-join">Join</button>
+          <button type="submit" class="btn-join">{{ t.join.join }}</button>
         </div>
       </form>
     </div>
@@ -27,7 +27,7 @@
 
     <div class="join-section centered">
       <form action="create_room" method="POST">
-        <button type="submit" class="btn-create">Create a room</button>
+        <button type="submit" class="btn-create">{{ t.join.create_room }}</button>
       </form>
     </div>
 

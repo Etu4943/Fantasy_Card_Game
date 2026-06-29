@@ -21,6 +21,14 @@
 	},
 
 	"room" : {
-		"opponent_disconnect" : "Opponent disconnected ..."
+		"opponent_disconnect" : "Opponent disconnected ...",
+		"waiting_for_opponent" : "Waiting for opponent.",
+		"your_turn" : "Your turn",
+		"opponent_turn" : "Opponent's turn"
+	},
+
+	"join" : {
+		"create_room" : "Create a room",
+		"join" : "Join"
 	}
 } 
