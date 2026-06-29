@@ -15,7 +15,9 @@
 	},
 
 	"base" : {
-		"join" : "Rejoindre une partie"
+		"join" : "Rejoindre une partie",
+		"refresh" : "Rafraichir",
+		"quit" : "Quitter"
 	},
 
 	"room" : {

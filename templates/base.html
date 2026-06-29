@@ -21,9 +21,12 @@
 			      {% if session['room'] %}[{{ session['room'] }}] {% endif %}
 			    </a>
 
+			    {% if session['room'] %}
+			    	<button id="refresh-btn" class="nav-btn">{{ t.base.refresh }}</button>
+			    {% endif %}
 			    <ul class="nav-links">
 			      {% if session['room'] %}
-			      	<li><a id="quit-btn" href="#" class="nav-link">Quit</a></li>
+			      	<li><a id="quit-btn" href="#" class="nav-link">{{ t.base.quit }}</a></li>
 			      {% else %}
 			      	<li><a href="/join" class="nav-link {% if request.path == '/join' %}active{% endif %}">{{ t.base.join }}</a></li>
 			      {% endif %}

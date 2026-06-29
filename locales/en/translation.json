@@ -15,7 +15,9 @@
 	},
 
 	"base" : {
-		"join" : "Join"
+		"join" : "Join",
+		"refresh" : "Refresh",
+		"quit" : "Quit"
 	},
 
 	"room" : {

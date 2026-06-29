@@ -314,6 +314,10 @@
 			document.getElementById("blur-overlay").classList.remove("visible");
 		})
 
+		socket.on("blur",() => {
+			document.getElementById("blur-overlay").classList.add("visible");
+		})
+
 
 		function blur(message){
 			document.getElementById("blur-overlay").classList.add("visible");
@@ -399,6 +403,10 @@
 			socket.emit("ask_hand");
 			socket.emit("ask_opponent_hand");
 
+			document.getElementById('refresh-btn')?.addEventListener('click', () => {
+				socket.emit("ask_refresh");
+			});
+
 		});
 	</script>
 {% endblock %}
@@ -431,7 +439,7 @@
 	        <button id="msg-btn" type="submit">Send</button>
 	    </div>
 	</div>
-	<div id="blur-overlay" class="visible">
+	<div id="blur-overlay" class="">
 	    <span id="overlay-text">Waiting for opponent.</span>
 	    <span id="overlay-code">Room Code : <strong>{{ session["room"] }}</strong></span>
 	    <button onclick="socket.emit('leave')" id="overlay-quit-btn">Cancel</button>

@@ -26,6 +26,19 @@ def handle_message(data):
 def handle_join(data):
     room_code = data.get('room_code')
     user_id = session.get('user_id')
+
+    # Annule une déco en attente pour ce joueur (= refresh)
+    if user_id in _pending_disconnects:
+        _pending_disconnects.pop(user_id).cancel()
+        print(f"{user_id} reconnected, disconnect cancelled")
+        sid_to_room[request.sid] = (room_code, user_id)
+        join_room(room_code)        
+        ROOMS[room_code]["players"].add(user_id)
+        emit("deblur", room=room_code) 
+        emit("set_round", ROOMS[room_code]["current_player_id"], to=request.sid)
+        diffuse_hand()          # restitue sa main sans réinitialiser
+        return
+
     # If the user quit and reconnect
     if room_code in hand.keys() and user_id in hand[room_code].keys():
         join_room(room_code)
@@ -46,13 +59,7 @@ def handle_join(data):
         session['room'] = None
         return redirect("/")
 
-    # Annule une déco en attente pour ce joueur (= refresh)
-    if user_id in _pending_disconnects:
-        _pending_disconnects.pop(user_id).cancel()
-        print(f"{user_id} reconnected, disconnect cancelled")
-        sid_to_room[request.sid] = (room_code, user_id)
-        diffuse_hand()          # restitue sa main sans réinitialiser
-        return
+    
 
 
 
@@ -60,9 +67,6 @@ def handle_join(data):
 
     ROOMS[room_code]["players"].add(user_id)
     sid_to_room[request.sid] = (room_code, user_id)
-    
-
-
 
     # Quand tu rejoins une partie, il faut lui créer et lui attribuer une main
     if room_code not in hand.keys() :
@@ -76,12 +80,14 @@ def handle_join(data):
 
     if len(ROOMS[room_code]["players"]) == 1 :
         player_round[room_code] = cycle([-2,-1]) # can't play while there isn't a second player
+        emit("blur", room=room_code)
     else :
         player_round[room_code] = cycle(ROOMS[room_code]["players"])
-        toggle_round_player(room_code, user_id)
+        
         for _ in range(random.randint(1, 10)) :
             ROOMS[room_code]["current_player_id"] = next(player_round[room_code]) # Here is the randomization
         # Here is the beginning of the game.
+        toggle_round_player(room_code, user_id)
         emit("deblur", room=room_code)
         # if ROOMS[room_code]["current_player_id"] == user_id :
         #     emit("highlight_deck", to=request.sid)
@@ -330,79 +336,71 @@ def hand_play(data):
         hand[room_code][user_id].remove(selected_card)
         board[room_code][user_id].append(selected_card)
 
-    if selected_card["name"] == "lutin" :
-        last_action[room_code]["name"] = "lutin"
-        hand[room_code][user_id], hand[room_code][opponent_id] = hand[room_code][opponent_id],hand[room_code][user_id]
-
-    elif selected_card["name"] == "farfadet" :
-        last_action[room_code]["name"] = "farfadet"
-        board[room_code][user_id],board[room_code][opponent_id] = board[room_code][opponent_id],board[room_code][user_id]
-        last_action[room_code]["name"] = "farfadet"
-
-    elif selected_card["name"] == "gnome" :
-        last_action[room_code]["name"] = "gnome"
-        for _ in range(2) :
-            handle_draw_a_card()
-
-
-
-    elif selected_card["name"] == "elfe" :
-        if len([ card for card in board[room_code][user_id] if card["name"] != "elfe"]) != 0 :
-            # If there is no card on board to replay
-            # 1 because the elfe card is already "played" on backend 
-            highlight_board(request.sid)
+    match selected_card["name"] :
+        case "lutin" :
+            last_action[room_code]["name"] = "lutin"
+            hand[room_code][user_id], hand[room_code][opponent_id] = hand[room_code][opponent_id],hand[room_code][user_id]
+        case "farfadet" :
+            last_action[room_code]["name"] = "farfadet"
+            board[room_code][user_id],board[room_code][opponent_id] = board[room_code][opponent_id],board[room_code][user_id]
+            last_action[room_code]["name"] = "farfadet"
+        case "gnome" :
+            last_action[room_code]["name"] = "gnome"
+            for _ in range(2) :
+                handle_draw_a_card() 
+        case "elfe" :
+            if len([ card for card in board[room_code][user_id] if card["name"] != "elfe"]) != 0 :
+                # If there is no card on board to replay
+                # 1 because the elfe card is already "played" on backend 
+                highlight_board(request.sid)
+                return
+        case "dryade" :
+            if len(board[room_code][opponent_id]) != 0 :
+                last_action[room_code]["name"] = "dryade"
+                highlight_opponent_board(request.sid)
+                return
+        case "fee" :
+            name = last_action[room_code]["name"]
+            if name == "farfadet" :
+                board[room_code][user_id].remove(selected_card)
+                board[room_code][user_id], board[room_code][opponent_id] = board[room_code][opponent_id], board[room_code][user_id]
+                board[room_code][user_id].append(selected_card) # Because in real life, you "refuse" the action by putting this in your board
+            elif name == "lutin" :
+                hand[room_code][user_id], hand[room_code][opponent_id] = hand[room_code][opponent_id], hand[room_code][user_id]
+            elif name == "dryade" :
+                for card in last_action[room_code]["cards"] :
+                    board[room_code][opponent_id].remove(card) 
+                    board[room_code][user_id].append(card)
+            elif name == "korrigan" :
+                for card in last_action[room_code]["cards"] :
+                    hand[room_code][opponent_id].remove(card)
+                    hand[room_code][user_id].append(card)
+            last_action[room_code] = dict()
+            last_action[room_code]["name"] = []
+            last_action[room_code]["cards"] = []
+        case "korrigan" :
+            last_action[room_code]["name"] = "korrigan"
+            card_to_steal[room_code][user_id] = 2
+            refresh(room_code, user_id, request.sid, toggle=True)
+            highlight_opponent_hand(request.sid)
             return
-        else :
-            pass
 
-    elif selected_card["name"] == "dryade":
-        if len(board[room_code][opponent_id]) != 0 :
-            last_action[room_code]["name"] = "dryade"
-            highlight_opponent_board(request.sid)
-            return
-        else :
-            pass
+    refresh(room_code, user_id, request.sid, toggle=True)
 
-    elif selected_card["name"] == "fee":
-        name = last_action[room_code]["name"]
-
-        if name == "farfadet" :
-            board[room_code][user_id].remove(selected_card)
-            board[room_code][user_id], board[room_code][opponent_id] = board[room_code][opponent_id], board[room_code][user_id]
-            board[room_code][user_id].append(selected_card) # Because in real life, you "refuse" the action by putting this in your board
-        elif name == "lutin" :
-            hand[room_code][user_id], hand[room_code][opponent_id] = hand[room_code][opponent_id], hand[room_code][user_id]
-        elif name == "dryade" :
-            for card in last_action[room_code]["cards"] :
-                board[room_code][opponent_id].remove(card) 
-                board[room_code][user_id].append(card)
-        elif name == "korrigan" :
-            for card in last_action[room_code]["cards"] :
-                hand[room_code][opponent_id].remove(card)
-                hand[room_code][user_id].append(card)
-        last_action[room_code] = dict()
-        last_action[room_code]["name"] = []
-        last_action[room_code]["cards"] = []
+    if len(deck[room_code]) == 0 and len(hand[room_code][opponent_id]) == 0 :
+        finish(room_code, user_id, opponent_id)
 
 
-            
-
-    elif selected_card["name"] == "korrigan":
-        last_action[room_code]["name"] = "korrigan"
-        card_to_steal[room_code][user_id] = 2
-
-        # For current user's visual :
-        diffuse_hand(request.sid)
-        diffuse_board(request.sid)
-        
-        # For opponent's visual :
-        emit("redraw_hand", room=room_code, include_self=False)
-        emit("redraw_board", room=room_code, include_self=False)
-
-        highlight_opponent_hand(request.sid)
+@socketio.on("ask_refresh")
+def handle_ask_refresh():
+    entry = sid_to_room.get(request.sid)
+    if entry is None :
         return
+    room_code, user_id = entry
 
+    refresh(room_code, user_id, request.sid)
 
+def refresh(room_code, user_id, rsid, toggle=False):
     # For current user's visual :
     diffuse_hand(request.sid)
     diffuse_board(request.sid)
@@ -410,14 +408,8 @@ def hand_play(data):
     # For opponent's visual :
     emit("redraw_hand", room=room_code, include_self=False)
     emit("redraw_board", room=room_code, include_self=False)
-
-    toggle_round_player(room_code, user_id)
-
-    # if len(deck[room_code]) > 0 :
-    #     emit("highlight_deck", room=room_code, include_self=False)
-
-    if len(deck[room_code]) == 0 and len(hand[room_code][opponent_id]) == 0 :
-        finish(room_code, user_id, opponent_id)
+    if toggle :
+        toggle_round_player(room_code, user_id)
 
 def finish(room_code, user_id, opponent_id) :
     opponent_score = len(board[room_code][opponent_id])
@@ -456,21 +448,7 @@ def steal_card_from_board(data):
 
     last_action[room_code]["cards"].append(selected_card)
 
-    """
-        Maybe try to encapsulate the "refresh" system ?
-    """
-    # For current user's visual :
-    diffuse_hand(request.sid)
-    diffuse_board(request.sid)
-    
-    # For opponent's visual :
-    emit("redraw_hand", room=room_code, include_self=False)
-    emit("redraw_board", room=room_code, include_self=False)
-
-    toggle_round_player(room_code, user_id)
-
-    # if len(deck[room_code]) > 0 :
-    #     emit("highlight_deck", room=room_code, include_self=False)
+    refresh(room_code, user_id, request.sid, toggle=True)
 
     if len(deck[room_code]) == 0 and len(hand[room_code][opponent_id]) == 0 :
         finish(room_code, user_id, opponent_id)
@@ -503,57 +481,18 @@ def steal_card_from_hand(data):
 
     if card_to_steal[room_code][user_id] == 0 or len(hand[room_code][opponent_id]) == 0:
 
-        diffuse_hand(request.sid)
-        diffuse_board(request.sid)
-        
-        # For opponent's visual :
-        emit("redraw_hand", room=room_code, include_self=False)
-        emit("redraw_board", room=room_code, include_self=False)
-
-        # if len(deck[room_code]) > 0 :
-        #     emit("highlight_deck", room=room_code, include_self=False)
-
-        toggle_round_player(room_code, user_id)
+        refresh(room_code, user_id, request.sid, toggle=True)
         emit("disable_opponent_hand_steal", to=request.sid)
 
         if len(deck[room_code]) == 0 and len(hand[room_code][opponent_id]) == 0 :
             finish(room_code, user_id, opponent_id)
         return
 
-    diffuse_hand(request.sid)
-    diffuse_board(request.sid)
-    
-    # For opponent's visual :
-    emit("redraw_hand", room=room_code, include_self=False)
-    emit("redraw_board", room=room_code, include_self=False)
-    # highlight_opponent_hand(request.sid)
+    refresh(room_code, user_id, request.sid)
         
-    
 
     if len(deck[room_code]) == 0 and len(hand[room_code][opponent_id]) == 0 :
         finish(room_code, user_id, opponent_id)
-    # " CAUGHT CHEATING ?????"
-
-    # """
-    #     Maybe try to encapsulate the "refresh" system ?
-    # """
-    # # For current user's visual :
-    # diffuse_hand(request.sid)
-    # diffuse_board(request.sid)
-    
-    # # For opponent's visual :
-    # emit("redraw_hand", room=room_code, include_self=False)
-    # emit("redraw_board", room=room_code, include_self=False)
-
-    # if card_to_steal[room_code][user_id] == 0 :
-    #     ROOMS[room_code]["current_player_id"] = next(player_round[room_code])
-    #     toggle_round_player(room_code, user_id)
-    # highlight_opponent_hand(request.sid)
 
 def get_opponent_id(room_code, user_id):
     return (ROOMS[room_code]["players"] - {user_id}).pop()
-
-
-
-
-
