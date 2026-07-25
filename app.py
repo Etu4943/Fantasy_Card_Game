@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, redirect, session, url_for, g
+from flask import Flask, flash, render_template, request, redirect, session, url_for, g
 from extensions import socketio
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 import sqlite3
 import fsocket
 
@@ -27,7 +28,8 @@ cursor = db.cursor()
 
 NB_LETTERS_ROOM_SEQUENCE = 5
 MAX_PLAYERS = 2
-
+UPLOAD_FOLDER = os.path.join(app.root_path, 'static', 'Assets', 'avatars')
+ALLOWED_EXT = {'png', 'jpg', 'jpeg'}
 
 def login_required(f):
     """
@@ -170,6 +172,37 @@ def inject_translations():
     session["lang"] = lang
     return dict(t=get_translations(lang))
 
+@app.route('/profile', methods=["POST", "GET"])
+@login_required
+def profile():
+	if request.method == "GET" :
+		username, email, avatar = db.execute("SELECT username, email, avatar FROM users WHERE id = ?", (session.get("user_id"),)).fetchone()
+		return render_template("profile.html", username=username, email=email, avatar=avatar)
+	else :
+		pass
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXT
+
+@app.route("/upload_avatar", methods=["POST"])
+@login_required
+def upload_avatar():
+    if 'avatar' not in request.files :
+        flash("No file part")
+        return redirect("/profile")
+    file = request.files["avatar"]
+    if file.filename == "" :
+        flash("No selected file")
+        return redirect("/profile")
+    if file and allowed_file(file.filename):
+        ext = file.filename.rsplit('.', 1)[1].lower()
+        filename = f"user_{session['user_id']}.{ext}"
+        file.save(os.path.join(UPLOAD_FOLDER, filename))
+        db.execute("UPDATE users SET avatar = ? WHERE id = ?", (filename, session['user_id']))
+        db.commit()
+    else :
+        flash("Format de fichier non autorisé")
+    return redirect("/profile")
 
 if __name__ == "__main__" :
 	socketio.run(app)

@@ -7,6 +7,15 @@
 			{% block title %}
 			{% endblock %}
 		</title>
+		{% with messages = get_flashed_messages() %}
+		  {% if messages %}
+		    <ul class=flashes>
+		    {% for message in messages %}
+		      <li>{{ message }}</li>
+		    {% endfor %}
+		    </ul>
+		  {% endif %}
+		{% endwith %}
 		{% block head %}
 		{% endblock %}
 		<link rel="stylesheet" href="{{ url_for('static', filename='CSS/style.css')}}">
@@ -39,10 +48,14 @@
 			    	<button id="refresh-btn" class="nav-btn">{{ t.base.refresh }}</button>
 			    {% endif %}
 			    <ul class="nav-links">
+			    	{% if session["user_id"] %}
+			    		<li><a href="/profile" class="nav-link {% if request.path == '/profile' %}active{% endif %}">{{ t.base.profile }}</a></li>
+			    	{% endif %}
 			      {% if session['room'] %}
 			      	<li><a id="quit-btn" href="#" class="nav-link">{{ t.base.quit }}</a></li>
 			      {% else %}
 			      	<li><a href="/join" class="nav-link {% if request.path == '/join' %}active{% endif %}">{{ t.base.join }}</a></li>
+			      	<li><a href="/scoreboard" class="nav-link {% if request.path == '/scoreboard' %}active{% endif %}">{{ t.base.scoreboard }}</a></li>
 			      {% endif %}
 
 			    </ul>

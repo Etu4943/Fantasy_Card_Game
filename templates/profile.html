@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}
+	Profil
+
+{% endblock %}
+
+{% block head %}
+	<link rel="stylesheet" href="{{ url_for('static', filename='CSS/profile.css')}}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='CSS/login.css')}}">
+	{% if avatar %}
+		<style>
+			.avatar-circle {
+				background-image: url("{{ url_for('static', filename='Assets/avatars/' + avatar) }}");
+			}
+		</style>
+	{% endif %}
+{% endblock %}
+
+{% block content %}
+	<main class="profile-page">
+		<div class="profile-card">
+
+			<h2 class="login-title profile-title">{{ t.profile.title }}</h2>
+			<p class="login-sub">{{ t.profile.subtitle }}</p>
+
+			<form class="" action="/upload_avatar" method="POST" enctype="multipart/form-data">
+
+				<div class="avatar-wrap">
+					<label for="avatar-input" class="avatar-circle" id="avatar-preview">
+						{% if not avatar %}
+							<span class="avatar-initial">{{ (session['username'] or '?')[0] | upper }}</span>
+						{% endif %}
+						<span class="avatar-overlay">{{ t.profile.change_avatar }}</span>
+					</label>
+					<input type="file" id="avatar-input" name="avatar" accept="image/png, image/jpeg" hidden>
+					<button type="submit">Envoyer</button>
+				</div>
+			</form>
+
+			<form class="login-form profile-form" action="/profile" method="POST" enctype="multipart/form-data">
+
+				
+
+				<div class="field">
+					<label for="profile-username">{{ t.login.username }}</label>
+					<input type="text" id="profile-username" name="username" value="{{ username or '' }}" autocomplete="off" placeholder="{{ t.login.username_placeholder }}" required>
+				</div>
+
+				<div class="field">
+					<label for="profile-email">{{ t.login.email }}</label>
+					<input type="email" id="profile-email" name="email" value="{{ email or '' }}" autocomplete="off" placeholder="{{ t.login.email_placeholder }}" required>
+				</div>
+
+				<button type="submit" class="btn btn-primary">{{ t.profile.save }}</button>
+				<p class="login-error">{{ err or '' }}</p>
+			</form>
+
+		</div>
+	</main>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			const input = document.getElementById('avatar-input');
+			const preview = document.getElementById('avatar-preview');
+
+			input.addEventListener('change', () => {
+				const file = input.files[0];
+				if (!file) return;
+				const reader = new FileReader();
+				reader.onload = (e) => {
+					preview.style.backgroundImage = `url('${e.target.result}')`;
+					preview.classList.add('has-image');
+				};
+				reader.readAsDataURL(file);
+			});
+		});
+	</script>
+{% endblock %}

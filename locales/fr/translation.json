@@ -17,7 +17,9 @@
 	"base" : {
 		"join" : "Rejoindre une partie",
 		"refresh" : "Rafraichir",
-		"quit" : "Quitter"
+		"quit" : "Quitter",
+		"scoreboard" : "Tableau des scores",
+		"profile" : "Mon profil"
 	},
 
 	"room" : {
@@ -35,5 +37,12 @@
 	"join" : {
 		"create_room" : "Créer une partie",
 		"join" : "Rejoindre"
+	},
+
+	"profile" : {
+		"title" : "Mon profil",
+		"subtitle" : "Modifier mon profil",
+		"change_avatar" : "Changer mon avatar",
+		"save" : "Sauver"
 	}
 } 

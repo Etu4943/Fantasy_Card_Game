@@ -275,7 +275,7 @@ body::before {
     background: transparent;
     color: #fff;
     font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 500;
     cursor: pointer;
     transition: background 0.15s ease;
@@ -387,7 +387,7 @@ body::before {
 }
 
 #last-card-label {
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 500;
     letter-spacing: 0.06em;
     color: #45475a;
