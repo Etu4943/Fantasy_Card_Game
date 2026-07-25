@@ -335,7 +335,7 @@
 		    	result.textContent = "Even !"
 		    	result.className = "even"
 		    }else {
-		    	result.textContent = did_win ? "You Win !" : "You Lose.";
+		    	result.textContent = did_win ? {{ t.room.you_win | tojson }} : {{ t.room.you_lose | tojson }};
 		    	result.className   = did_win ? "win" : "lose";
 		    }
 		    
@@ -343,9 +343,9 @@
 
 		    if (!is_even) {
 		    	if (did_win){
-		    		scoresDiv.innerHTML = `You  : ${winner_score} pts &nbsp;|&nbsp; Opponent : ${loser_score} pts`;
+		    		scoresDiv.innerHTML = `${T.room.you}  : ${winner_score} pts &nbsp;|&nbsp; ${T.room.opponent} : ${loser_score} pts`;
 		    	}else{
-		    		scoresDiv.innerHTML = `You  : ${loser_score} pts &nbsp;|&nbsp; Opponent : ${winner_score} pts`;
+		    		scoresDiv.innerHTML = `${T.room.you}  : ${loser_score} pts &nbsp;|&nbsp; ${T.room.opponent} : ${winner_score} pts`;
 		    	}
 		         
 		    }
@@ -448,7 +448,7 @@
     <div id="end-modal">
         <div id="end-result">You Win !</div>
         <div id="end-scores"></div>
-        <button onclick="window.location.href='/quit_room'">Back to lobby</button>
+        <button onclick="window.location.href='/quit_room'">{{ t.room.back_to_lobby }}</button>
     </div>
 </div>
 {% endblock %}

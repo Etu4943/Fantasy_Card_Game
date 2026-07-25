@@ -24,7 +24,12 @@
 		"opponent_disconnect" : "L'adversaire s'est déconnecté ...",
 		"waiting_for_opponent" : "En attente d'un adversaire",
 		"your_turn" : "A toi de jouer",
-		"opponent_turn" : "Au tour de l'adversaire"
+		"opponent_turn" : "Au tour de l'adversaire",
+		"you_win" : "Tu as gagné !",
+		"you_lose" : "Tu as perdu.",
+		"back_to_lobby" : "Revenir",
+		"you" : "Toi",
+		"opponent" : "Adversaire"
 	},
 
 	"join" : {

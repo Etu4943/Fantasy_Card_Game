@@ -24,7 +24,12 @@
 		"opponent_disconnect" : "Opponent disconnected ...",
 		"waiting_for_opponent" : "Waiting for opponent.",
 		"your_turn" : "Your turn",
-		"opponent_turn" : "Opponent's turn"
+		"opponent_turn" : "Opponent's turn",
+		"you_win" : "You win !",
+		"you_lose" : "You lose.",
+		"back_to_lobby" : "Back to lobby",
+		"you" : "You",
+		"opponent" : "Opponent"
 	},
 
 	"join" : {
