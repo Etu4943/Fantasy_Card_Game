@@ -8,6 +8,7 @@ import json
 import os
 
 from state import ROOMS
+from state import game_state as GS
 from random import randint
 
 from functools import wraps
@@ -111,7 +112,7 @@ def join():
 		room_sequence = request.form.get("room_sequence")
 		if room_sequence not in ROOMS.keys() :
 			return render_template("error.html", err=f"This room doesn't exists yet !")
-		elif len(ROOMS[room_sequence]['players']) == MAX_PLAYERS :
+		elif len(GS[room_sequence]['players']) == MAX_PLAYERS :
 			return render_template("error.html", err=f"This room is already full !")
 		else :
 
@@ -122,6 +123,14 @@ def join():
 def create_room():
 	room_sequence = create_room_sequence(NB_LETTERS_ROOM_SEQUENCE)
 	ROOMS[room_sequence] = {'players' : set(), 'messages' : []}
+	GS[room_sequence] = dict()
+	GS[room_sequence]["players"] = dict()
+	GS[room_sequence]["deck"] = []
+	GS[room_sequence]["last_action"] = dict()
+	GS[room_sequence]["last_action"]["cards"] = []
+	GS[room_sequence]["last_action"]["name"] = ""
+	GS[room_sequence]["player_round"] = None
+	GS[room_sequence]["current_player_id"] = 0
 	return join_a_room(room_sequence)
 
 def join_a_room(room_sequence): # join_room is in socketio

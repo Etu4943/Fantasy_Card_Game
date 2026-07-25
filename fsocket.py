@@ -1,5 +1,6 @@
 from extensions import socketio
 from state import ROOMS, sid_to_room, hand, deck, board, player_round, card_to_steal, last_action
+from state import game_state as GS
 
 from flask import request, session, redirect
 from flask_socketio import join_room, leave_room, send, SocketIO, emit
@@ -33,18 +34,18 @@ def handle_join(data):
         print(f"{user_id} reconnected, disconnect cancelled")
         sid_to_room[request.sid] = (room_code, user_id)
         join_room(room_code)        
-        ROOMS[room_code]["players"].add(user_id)
+        GS[room_code]["players"].add(user_id)
         emit("deblur", room=room_code) 
-        emit("set_round", ROOMS[room_code]["current_player_id"], to=request.sid)
+        emit("set_round", GS[room_code]["current_player_id"], to=request.sid)
         diffuse_hand()          # restitue sa main sans réinitialiser
         return
 
     # If the user quit and reconnect
     if room_code in hand.keys() and user_id in hand[room_code].keys():
         join_room(room_code)
-        ROOMS[room_code]["players"].add(user_id)
+        # ROOMS[room_code]["players"].add(user_id)
         emit("deblur", room=room_code)
-        emit("set_round", ROOMS[room_code]["current_player_id"], to=request.sid)
+        emit("set_round", GS[room_code]["current_player_id"], to=request.sid)
         print("He returned !!")
         
         sid_to_room[request.sid] = (room_code, user_id) # Doesn't remove the old sid btw
@@ -55,7 +56,7 @@ def handle_join(data):
         # toggle_round_player(room_code, user_id)
         return
 
-    if room_code not in ROOMS.keys() :
+    if room_code not in GS.keys() :
         session['room'] = None
         return redirect("/")
 
@@ -65,27 +66,33 @@ def handle_join(data):
 
     join_room(room_code)
 
-    ROOMS[room_code]["players"].add(user_id)
+    # ROOMS[room_code]["players"].add(user_id)
+    GS[room_code]["players"][user_id] = dict()
+    GS[room_code]["players"][user_id]["hand"] = []
+    GS[room_code]["players"][user_id]["board"] = []
+    GS[room_code]["players"][user_id]["card_to_steal"] = 0
     sid_to_room[request.sid] = (room_code, user_id)
 
     # Quand tu rejoins une partie, il faut lui créer et lui attribuer une main
-    if room_code not in hand.keys() :
-        board[room_code] = dict()
-        hand[room_code] = dict()
-        card_to_steal[room_code] = dict()
-        last_action[room_code] = dict()
-        last_action[room_code]["cards"] = []
-        last_action[room_code]["name"] = ""
-    card_to_steal[room_code][user_id] = 0
+    if room_code not in GS.keys() :
+        GS[room_code] = dict()
+        GS[room_code]["board"] = dict()
+        GS[room_code][user_id]["hand"] = []
+        GS[room_code]["last_action"] = dict()
+        GS[room_code]["last_action"]["cards"] = []
+        GS[room_code]["last_action"]["name"] = ""
+        GS[room_code]["deck"] = [];
+    GS[room_code]["players"][user_id]["card_to_steal"] = 0
 
-    if len(ROOMS[room_code]["players"]) == 1 :
-        player_round[room_code] = cycle([-2,-1]) # can't play while there isn't a second player
+    if len(GS[room_code]["players"]) == 1 :
+        GS[room_code]["player_round"] = cycle([-2,-1])
+        # player_round[room_code] = cycle([-2,-1]) # can't play while there isn't a second player
         emit("blur", room=room_code)
     else :
-        player_round[room_code] = cycle(ROOMS[room_code]["players"])
+        GS[room_code]["player_round"] = cycle(GS[room_code]["players"])
         
         for _ in range(random.randint(1, 10)) :
-            ROOMS[room_code]["current_player_id"] = next(player_round[room_code]) # Here is the randomization
+            GS[room_code]["current_player_id"] = next(GS[room_code]["player_round"]) # Here is the randomization
         # Here is the beginning of the game.
         toggle_round_player(room_code, user_id)
         emit("deblur", room=room_code)
@@ -95,17 +102,18 @@ def handle_join(data):
         #     emit("highlight_deck", room=room_code, include_self=False)
         
 
-    hand[room_code][user_id] = []
-    board[room_code][user_id] = []
-    if room_code not in deck.keys() :
+
+    GS[room_code]["players"][user_id]["hand"] = []
+    GS[room_code]["players"][user_id]["board"] = []
+    if GS[room_code]["deck"] == [] :
         init_deck(room_code)
     init_hand(room_code, user_id)
     #socketio.emit('message', {'message':f'{session.get("username")} has entered the game !'}, room=room_code, include_self=False)
     diffuse_message({'message' : "has enter the chat"})
 
 def toggle_round_player(room_code, user_id):
-    ROOMS[room_code]["current_player_id"] = next(player_round[room_code])
-    emit("set_round", ROOMS[room_code]["current_player_id"], room=room_code)
+    GS[room_code]["current_player_id"] = next(GS[room_code]["player_round"])
+    emit("set_round", GS[room_code]["current_player_id"], room=room_code)
 
 
 
@@ -154,14 +162,12 @@ def handle_leave():
 
 
 def remove_player(room_code, user_id):
-    if room_code in ROOMS:
-        ROOMS[room_code]['players'].discard(user_id)
-        if not ROOMS[room_code]['players']:
+    if room_code in GS.keys():
+        del GS[room_code]["players"][user_id]
+        # print(GS)
+        if not GS[room_code]['players']:
             print("No more players. Lets NUKE IT")
-            del board[room_code]
-            del hand[room_code]
-            del player_round[room_code]
-            del ROOMS[room_code]
+            del GS[room_code]
         else :
             socketio.emit('opponent_disconnected', room=room_code)
 
@@ -202,11 +208,12 @@ def diffuse_board(rsid=None):
 
     # print(board[room_code][user_id])
 
-    board[room_code][user_id] = sorted(board[room_code][user_id], key=lambda d: d['name'])
+    # board[room_code][user_id] = sorted(board[room_code][user_id], key=lambda d: d['name'])
+    GS[room_code]["players"][user_id]["board"] = sorted(GS[room_code]["players"][user_id]["board"], key=lambda d: d['name'])
 
-    emit("board", board[room_code][user_id], to=rsid)
+    emit("board", GS[room_code]["players"][user_id]["board"], to=rsid)
     # board_to_opponent = board_for_opponent(room_code, user_id)
-    emit("opponent_board", sorted(board[room_code][user_id], key=lambda d: d['name'], reverse=True), room=room_code, include_self=False)
+    emit("opponent_board", sorted(GS[room_code]["players"][user_id]["board"], key=lambda d: d['name'], reverse=True), room=room_code, include_self=False)
 
 def diffuse_hand(rsid=None):
     if rsid is None : # If i call diffuse_hand from this code like hand_play
@@ -219,15 +226,16 @@ def diffuse_hand(rsid=None):
     room_code, user_id = entry
     
     # print(f"Room_code : {room_code} - user_id : {user_id}")
-    emit("hand", hand[room_code][user_id], to=request.sid) # Envoit uniquement les cartes au joueur concerné
+    # emit("hand", hand[room_code][user_id], to=request.sid) # Envoit uniquement les cartes au joueur concerné
+    emit("hand", GS[room_code]["players"][user_id]["hand"], to=request.sid) # Envoit uniquement les cartes au joueur concerné
 
     """"
         I need to display the opponent card, with the ability to steal them (so I have to be able to identify them, so I need ID)
     """
-    if len(ROOMS[room_code]["players"]) > 1 :
+    if len(GS[room_code]["players"]) > 1 :
         hand_to_opponent = hand_for_opponent(room_code, user_id)
         # print(hand_to_opponent)
-        emit("opponent_hand", hand[room_code][user_id], room=room_code, include_self=False)
+        emit("opponent_hand", GS[room_code]["players"][user_id]["hand"], room=room_code, include_self=False)
 
 
 """
@@ -245,9 +253,9 @@ def handle_ask_opponent_hand():
 
     room_code, user_id = entry
     
-    if len(ROOMS[room_code]["players"]) ==  1:
+    if len(GS[room_code]["players"]) ==  1:
         return
-    opponent_id = (ROOMS[room_code]["players"] - {user_id}).pop()
+    opponent_id = (GS[room_code]["players"].keys() - {user_id}).pop()
 
     hand_to_opponent = hand_for_opponent(room_code, opponent_id)
     emit("opponent_hand", hand_to_opponent, to=request.sid)
@@ -256,13 +264,13 @@ def handle_ask_opponent_hand():
 
 def hand_for_opponent(room_code, user_id):
     hand_to_opponent = []
-    for card in hand[room_code][user_id] :
+    for card in GS[room_code]["players"][user_id]["hand"] :
         hand_to_opponent.append({"id":card["id"]})
     return hand_to_opponent
 
 def board_for_opponent(room_code, user_id):
     board_to_opponent = []
-    for card in board[room_code][user_id] :
+    for card in GS[room_code]["players"][user_id]["board"] :
         board_to_opponent.append({"id":card["id"]})
     return board_to_opponent
 
@@ -278,12 +286,12 @@ def handle_draw_a_card():
         return
     room_code, user_id = entry
 
-    if user_id != ROOMS[room_code]["current_player_id"] :
+    if user_id != GS[room_code]["current_player_id"] :
         return
     room_code, user_id = (session.get("room"), session.get("user_id"))
     add_card_to_hand(room_code, user_id)
     draw_card(room_code, user_id)
-    if len(deck[room_code]) == 0 :
+    if len(GS[room_code]["deck"]) == 0 :
         emit("empty_deck", room=room_code)
 
 
@@ -313,54 +321,56 @@ def hand_play(data):
     room_code, user_id = entry
     opponent_id = get_opponent_id(room_code, user_id)
     if is_from_elfe :
-        if data["card_id"] not in [card["id"] for card in board[room_code][user_id]] :
+        # Si tu joues une carte de ton plateau 
+        if data["card_id"] not in [card["id"] for card in GS[room_code]["players"][user_id]["board"]] :
             diffuse_message({"user": "system", "message":"CAUGHT CHEATING !"})
             return
     else :
-        if data["card_id"] not in [card["id"] for card in hand[room_code][user_id]] :
+        # Si tu joues une carte de ta main
+        if data["card_id"] not in [card["id"] for card in GS[room_code]["players"][user_id]["hand"]] :
             diffuse_message({"user": "system", "message":"CAUGHT CHEATING !"})
             return
 
-    if ROOMS[room_code]["current_player_id"] != user_id :
+    if GS[room_code]["current_player_id"] != user_id :
         # print(f"Current player : {ROOMS[room_code]["current_player_id"]}")
         print("Not your turn !")
         return
     
     if is_from_elfe :
-        selected_card = [card for card in board[room_code][user_id] if card["id"] == card_id][0]
+        selected_card = [card for card in GS[room_code]["players"][user_id]["board"] if card["id"] == card_id][0]
     else :
-        selected_card = [card for card in hand[room_code][user_id] if card["id"] == card_id][0]
+        selected_card = [card for card in GS[room_code]["players"][user_id]["hand"] if card["id"] == card_id][0]
         emit("display_last_card", selected_card["name"], room=room_code)
 
     if not data["is_from_elfe"] :
-        hand[room_code][user_id].remove(selected_card)
-        board[room_code][user_id].append(selected_card)
+        GS[room_code]["players"][user_id]["hand"].remove(selected_card)
+        GS[room_code]["players"][user_id]["board"].append(selected_card)
 
     match selected_card["name"] :
         case "lutin" :
-            last_action[room_code]["name"] = "lutin"
-            hand[room_code][user_id], hand[room_code][opponent_id] = hand[room_code][opponent_id],hand[room_code][user_id]
+            GS[room_code]["last_action"]["name"] = "lutin"
+            GS[room_code]["players"][user_id]["hand"], GS[room_code]["players"][opponent_id]["hand"] = GS[room_code]["players"][opponent_id]["hand"],GS[room_code]["players"][user_id]["hand"]
         case "farfadet" :
-            last_action[room_code]["name"] = "farfadet"
-            board[room_code][user_id],board[room_code][opponent_id] = board[room_code][opponent_id],board[room_code][user_id]
-            last_action[room_code]["name"] = "farfadet"
+            GS[room_code]["last_action"]["name"] = "farfadet"
+            GS[room_code]["players"][user_id]["board"],GS[room_code]["players"][opponent_id]["board"] = GS[room_code]["players"][opponent_id]["board"],GS[room_code]["players"][user_id]["board"]
+            GS[room_code]["last_action"]["name"] = "farfadet"
         case "gnome" :
-            last_action[room_code]["name"] = "gnome"
+            GS[room_code]["last_action"]["name"] = "gnome"
             for _ in range(2) :
                 handle_draw_a_card() 
         case "elfe" :
-            if len([ card for card in board[room_code][user_id] if card["name"] != "elfe"]) != 0 :
+            if len([ card for card in GS[room_code]["players"][user_id]["board"] if card["name"] != "elfe"]) != 0 :
                 # If there is no card on board to replay
                 # 1 because the elfe card is already "played" on backend 
                 highlight_board(request.sid)
                 return
         case "dryade" :
-            if len(board[room_code][opponent_id]) != 0 :
-                last_action[room_code]["name"] = "dryade"
+            if len(GS[room_code]["players"][opponent_id]["board"]) != 0 :
+                GS[room_code]["last_action"]["name"] = "dryade"
                 highlight_opponent_board(request.sid)
                 return
         case "fee" :
-            name = last_action[room_code]["name"]
+            name = GS[room_code]["last_action"]["name"]
             if name == "farfadet" :
                 board[room_code][user_id].remove(selected_card)
                 board[room_code][user_id], board[room_code][opponent_id] = board[room_code][opponent_id], board[room_code][user_id]
@@ -375,19 +385,19 @@ def hand_play(data):
                 for card in last_action[room_code]["cards"] :
                     hand[room_code][opponent_id].remove(card)
                     hand[room_code][user_id].append(card)
-            last_action[room_code] = dict()
-            last_action[room_code]["name"] = []
-            last_action[room_code]["cards"] = []
+            GS[room_code]["last_action"] = dict()
+            GS[room_code]["last_action"]["name"] = []
+            GS[room_code]["last_action"]["name"] = []
         case "korrigan" :
-            last_action[room_code]["name"] = "korrigan"
-            card_to_steal[room_code][user_id] = 2
+            GS[room_code]["last_action"]["name"]= "korrigan"
+            GS[room_code]["players"][user_id]["card_to_steal"] = 2
             refresh(room_code, user_id, request.sid, toggle=True)
             highlight_opponent_hand(request.sid)
             return
 
     refresh(room_code, user_id, request.sid, toggle=True)
 
-    if len(deck[room_code]) == 0 and len(hand[room_code][opponent_id]) == 0 :
+    if len(GS[room_code]["deck"]) == 0 and len(GS[room_code]["players"][opponent_id]["hand"]) == 0 :
         finish(room_code, user_id, opponent_id)
 
 
@@ -412,8 +422,8 @@ def refresh(room_code, user_id, rsid, toggle=False):
         toggle_round_player(room_code, user_id)
 
 def finish(room_code, user_id, opponent_id) :
-    opponent_score = len(board[room_code][opponent_id])
-    user_score = len(board[room_code][user_id])
+    opponent_score = len(GS[room_code]["players"][opponent_id]["board"])
+    user_score = len(GS[room_code]["players"][user_id]["board"])
 
     if user_score > opponent_score :
         winner_id = user_id
@@ -437,20 +447,20 @@ def steal_card_from_board(data):
     room_code, user_id = entry
     opponent_id = get_opponent_id(room_code, user_id)
 
-    if card_id not in [card["id"] for card in board[room_code][opponent_id]]:
+    if card_id not in [card["id"] for card in GS[room_code]["players"][opponent_id]["board"]]:
         diffuse_message({"user": "system", "message":"CAUGHT CHEATING !"})
         return
 
-    selected_card = [card for card in board[room_code][opponent_id] if card["id"] == card_id][0]
+    selected_card = [card for card in GS[room_code]["players"][opponent_id]["board"] if card["id"] == card_id][0]
 
-    board[room_code][opponent_id].remove(selected_card)
-    board[room_code][user_id].append(selected_card)
+    GS[room_code]["players"][opponent_id]["board"].remove(selected_card)
+    GS[room_code]["players"][user_id]["board"].append(selected_card)
 
-    last_action[room_code]["cards"].append(selected_card)
+    GS[room_code]["last_action"]["cards"].append(selected_card)
 
     refresh(room_code, user_id, request.sid, toggle=True)
 
-    if len(deck[room_code]) == 0 and len(hand[room_code][opponent_id]) == 0 :
+    if len(GS[room_code]["deck"]) == 0 and len(GS[room_code]["players"][opponent_id]["board"]) == 0 :
         finish(room_code, user_id, opponent_id)
 @socketio.on("steal_card_from_hand")
 def steal_card_from_hand(data):
@@ -464,35 +474,35 @@ def steal_card_from_hand(data):
     room_code, user_id = entry
 
     opponent_id = get_opponent_id(room_code, user_id)
-    if card_id not in [card["id"] for card in hand[room_code][opponent_id]]:
+    if card_id not in [card["id"] for card in GS[room_code]["players"][opponent_id]["hand"]]:
         print("Cheating !")
         print(f"Card id : {card_id}")
         diffuse_message({"user": "system", "message":"CAUGHT CHEATING !"})
         return
 
-    selected_card = [card for card in hand[room_code][opponent_id] if card["id"] == card_id][0]
+    selected_card = [card for card in GS[room_code]["players"][opponent_id]["hand"] if card["id"] == card_id][0]
 
-    hand[room_code][opponent_id].remove(selected_card)
-    hand[room_code][user_id].append(selected_card)
+    GS[room_code]["players"][opponent_id]["hand"].remove(selected_card)
+    GS[room_code]["players"][user_id]["hand"].append(selected_card)
 
-    last_action[room_code]["cards"].append(selected_card)
+    GS[room_code]["last_action"]["cards"].append(selected_card)
 
-    card_to_steal[room_code][user_id] -= 1
+    GS[room_code]["players"][user_id]["card_to_steal"] -= 1
 
-    if card_to_steal[room_code][user_id] == 0 or len(hand[room_code][opponent_id]) == 0:
+    if GS[room_code]["players"][user_id]["card_to_steal"] == 0 or len(GS[room_code]["players"][opponent_id]["hand"]) == 0:
 
         refresh(room_code, user_id, request.sid, toggle=True)
         emit("disable_opponent_hand_steal", to=request.sid)
 
-        if len(deck[room_code]) == 0 and len(hand[room_code][opponent_id]) == 0 :
+        if len(GS[room_code]["deck"]) == 0 and len(GS[room_code]["players"][opponent_id]["hand"]) == 0 :
             finish(room_code, user_id, opponent_id)
         return
 
     refresh(room_code, user_id, request.sid)
         
 
-    if len(deck[room_code]) == 0 and len(hand[room_code][opponent_id]) == 0 :
+    if len(GS[room_code]["deck"]) == 0 and len(GS[room_code]["players"][opponent_id]["hand"]) == 0 :
         finish(room_code, user_id, opponent_id)
 
 def get_opponent_id(room_code, user_id):
-    return (ROOMS[room_code]["players"] - {user_id}).pop()
+    return (GS[room_code]["players"].keys() - {user_id}).pop()
