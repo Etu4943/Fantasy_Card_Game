@@ -6,7 +6,7 @@ from card import Card
 import random
 import uuid
 
-NB_PEOPLE = 8 
+NB_PEOPLE = 3
 NB_CARD_BY_HAND = 7
 
 CARDS = [

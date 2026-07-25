@@ -41,20 +41,20 @@ def handle_join(data):
         return
 
     # If the user quit and reconnect
-    if room_code in hand.keys() and user_id in hand[room_code].keys():
-        join_room(room_code)
-        # ROOMS[room_code]["players"].add(user_id)
-        emit("deblur", room=room_code)
-        emit("set_round", GS[room_code]["current_player_id"], to=request.sid)
-        print("He returned !!")
+    # if room_code in hand.keys() and user_id in hand[room_code].keys():
+    #     join_room(room_code)
+    #     # ROOMS[room_code]["players"].add(user_id)
+    #     emit("deblur", room=room_code)
+    #     emit("set_round", GS[room_code]["current_player_id"], to=request.sid)
+    #     print("He returned !!")
         
-        sid_to_room[request.sid] = (room_code, user_id) # Doesn't remove the old sid btw
-        diffuse_hand()
-        diffuse_board()
-        emit("opponent_board", sorted(board[room_code][get_opponent_id(room_code, user_id)], key=lambda d: d['name'], reverse=True), to=request.sid)
+    #     sid_to_room[request.sid] = (room_code, user_id) # Doesn't remove the old sid btw
+    #     diffuse_hand()
+    #     diffuse_board()
+    #     emit("opponent_board", sorted(board[room_code][get_opponent_id(room_code, user_id)], key=lambda d: d['name'], reverse=True), to=request.sid)
 
-        # toggle_round_player(room_code, user_id)
-        return
+    #     # toggle_round_player(room_code, user_id)
+    #     return
 
     if room_code not in GS.keys() :
         session['room'] = None
@@ -369,29 +369,29 @@ def hand_play(data):
                 GS[room_code]["last_action"]["name"] = "dryade"
                 highlight_opponent_board(request.sid)
                 return
-        case "fee" :
-            name = GS[room_code]["last_action"]["name"]
-            if name == "farfadet" :
-                board[room_code][user_id].remove(selected_card)
-                board[room_code][user_id], board[room_code][opponent_id] = board[room_code][opponent_id], board[room_code][user_id]
-                board[room_code][user_id].append(selected_card) # Because in real life, you "refuse" the action by putting this in your board
-            elif name == "lutin" :
-                hand[room_code][user_id], hand[room_code][opponent_id] = hand[room_code][opponent_id], hand[room_code][user_id]
-            elif name == "dryade" :
-                for card in last_action[room_code]["cards"] :
-                    board[room_code][opponent_id].remove(card) 
-                    board[room_code][user_id].append(card)
-            elif name == "korrigan" :
-                for card in last_action[room_code]["cards"] :
-                    hand[room_code][opponent_id].remove(card)
-                    hand[room_code][user_id].append(card)
-            GS[room_code]["last_action"] = dict()
-            GS[room_code]["last_action"]["name"] = []
-            GS[room_code]["last_action"]["name"] = []
+        # case "fee" :
+        #     name = GS[room_code]["last_action"]["name"]
+        #     if name == "farfadet" :
+        #         board[room_code][user_id].remove(selected_card)
+        #         board[room_code][user_id], board[room_code][opponent_id] = board[room_code][opponent_id], board[room_code][user_id]
+        #         board[room_code][user_id].append(selected_card) # Because in real life, you "refuse" the action by putting this in your board
+        #     elif name == "lutin" :
+        #         hand[room_code][user_id], hand[room_code][opponent_id] = hand[room_code][opponent_id], hand[room_code][user_id]
+        #     elif name == "dryade" :
+        #         for card in last_action[room_code]["cards"] :
+        #             board[room_code][opponent_id].remove(card) 
+        #             board[room_code][user_id].append(card)
+        #     elif name == "korrigan" :
+        #         for card in last_action[room_code]["cards"] :
+        #             hand[room_code][opponent_id].remove(card)
+        #             hand[room_code][user_id].append(card)
+        #     GS[room_code]["last_action"] = dict()
+        #     GS[room_code]["last_action"]["name"] = []
+        #     GS[room_code]["last_action"]["name"] = []
         case "korrigan" :
             GS[room_code]["last_action"]["name"]= "korrigan"
             GS[room_code]["players"][user_id]["card_to_steal"] = 2
-            refresh(room_code, user_id, request.sid, toggle=True)
+            refresh(room_code, user_id, request.sid, toggle=False)
             highlight_opponent_hand(request.sid)
             return
 
@@ -460,7 +460,7 @@ def steal_card_from_board(data):
 
     refresh(room_code, user_id, request.sid, toggle=True)
 
-    if len(GS[room_code]["deck"]) == 0 and len(GS[room_code]["players"][opponent_id]["board"]) == 0 :
+    if len(GS[room_code]["deck"]) == 0 and len(GS[room_code]["players"][opponent_id]["hand"]) == 0 :
         finish(room_code, user_id, opponent_id)
 @socketio.on("steal_card_from_hand")
 def steal_card_from_hand(data):
