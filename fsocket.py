@@ -363,6 +363,7 @@ def hand_play(data):
                 # If there is no card on board to replay
                 # 1 because the elfe card is already "played" on backend 
                 highlight_board(request.sid)
+                emit("disable_hand_play", room=room_code, to=request.sid)
                 return
         case "dryade" :
             if len(GS[room_code]["players"][opponent_id]["board"]) != 0 :
@@ -390,10 +391,13 @@ def hand_play(data):
         #     GS[room_code]["last_action"]["name"] = []
         case "korrigan" :
             GS[room_code]["last_action"]["name"]= "korrigan"
-            GS[room_code]["players"][user_id]["card_to_steal"] = 2
-            refresh(room_code, user_id, request.sid, toggle=False)
-            highlight_opponent_hand(request.sid)
-            return
+            if len(GS[room_code]["players"][opponent_id]["hand"]) > 0 :
+                GS[room_code]["players"][user_id]["card_to_steal"] = 2
+                refresh(room_code, user_id, request.sid, toggle=False)
+                highlight_opponent_hand(request.sid)
+                return
+            else :
+                pass
 
     refresh(room_code, user_id, request.sid, toggle=True)
 

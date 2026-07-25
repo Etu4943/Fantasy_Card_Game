@@ -1,6 +1,11 @@
 /*
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap');
 */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=EB+Garamond:wght@400;500&display=swap');
+:root {
+  --font-title: 'Cinzel Decorative', serif;
+  --font-body: 'EB Garamond', serif;
+}
 
 /* ── Navbar ── */
 .navbar {
@@ -9,20 +14,23 @@
   justify-content: space-between;
   padding: 0 2rem;
   height: 60px;
-  background: #ffffff;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  font-family: 'DM Sans', sans-serif;
+
+  background: #1c1712;
+  border-bottom: 2px solid #3a2e1f;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+  font-family: var(--font-body);
 }
 
 
 /* Logo */
 .nav-logo {
+  font-family: var(--font-title);
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 17px;
   font-weight: 500;
-  color: #111;
+  color: #e8d9b5;
   text-decoration: none;
   letter-spacing: -0.02em;
 }
@@ -48,14 +56,14 @@
 .nav-link {
   font-size: 14px;
   font-weight: 400;
-  color: #888;
+  color: #a89676;
   text-decoration: none;
   transition: color 0.15s ease;
 }
 
 .nav-link:hover,
 .nav-link.active {
-  color: #111;
+  color: #d4af37;
 }
 
 .nav-link.active {
@@ -68,16 +76,16 @@
   font-weight: 500;
   padding: 7px 18px;
   border-radius: 8px;
-  border: 1px solid rgba(0, 0, 0, 0.18);
   background: transparent;
-  color: #111;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  color: #e8d9b5;
   text-decoration: none;
   cursor: pointer;
   transition: background 0.15s ease;
 }
 
 .nav-btn:hover {
-  background: #f5f5f5;
+  background: rgba(212, 175, 55, 0.12);
 }
 
 /* ── Mobile ── */
@@ -120,10 +128,14 @@
     font-weight: 500;
     padding: 7px 12px;
     border-radius: 8px;
-    border: 1px solid rgba(0, 0, 0, 0.18);
-    background: transparent;
-    color: #111;
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    background: #1c1712;
+    color: #e8d9b5;
     cursor: pointer;
+}
+
+.lang-btn:hover {
+  background: rgba(212, 175, 55, 0.12);
 }
 
 .lang-menu {
@@ -131,8 +143,8 @@
     position: absolute;
     top: calc(100% + 6px);
     right: 0;
-    background: #fff;
-    border: 1px solid rgba(0,0,0,0.1);
+    background: #241c14;
+    border: 1px solid #3a2e1f;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
@@ -144,12 +156,12 @@
     display: block;
     padding: 8px 14px;
     font-size: 13px;
-    color: #111;
+    color: #e8d9b5;
     text-decoration: none;
 }
 
 .lang-menu a:hover {
-    background: #f5f5f5;
+    background: rgba(212, 175, 55, 0.12);
 }
 
 .lang-menu.open {
@@ -165,6 +177,6 @@
 .nav-username {
   font-size: 13px;
   font-weight: 500;
-  color: #111;
+  color: #e8d9b5;
   letter-spacing: -0.01em;
 }

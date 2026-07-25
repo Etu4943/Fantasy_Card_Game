@@ -295,6 +295,11 @@
 			document.getElementById('opponent-hand').removeEventListener('click', on_opponent_hand_click);
 		});
 
+		socket.on("disable_hand_play", () => {
+			can_steal = false;
+			document.getElementById('player-hand').removeEventListener('click', on_hand_click);
+		});
+
 
 
 		socket.on("highlight_board", () => {
