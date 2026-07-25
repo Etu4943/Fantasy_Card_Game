@@ -6,16 +6,7 @@
 
 {% block head %}
 	<link rel="stylesheet" href="{{ url_for('static', filename='CSS/login.css')}}">
-  <style>
-    .login-page {
-      background-image: url("{{ url_for('static', filename='Assets/wallpaper.png') }}");
-    }
-    @media (max-width: 600px) {
-      .login-page {
-        background-image: url("{{ url_for('static', filename='Assets/wallpaper_mobile.png') }}");
-      }
-    }
-  </style>
+  
 {% endblock %}
 
 {% block content %}
@@ -30,13 +21,14 @@
       <form class="login-form" action="/login" method="POST">
         <div class="field">
           <label for="login-email">{{ t.login.email }}</label>
-          <input type="email" id="login-email" name="email" autocomplete="off" placeholder="{{ t.login.email_placeholder }}" required>
+          <input type="email" id="login-email" name="email" value="{{ email or '' }}" autocomplete="off" placeholder="{{ t.login.email_placeholder }}" required>
         </div>
         <div class="field">
           <label for="login-password">{{ t.login.password }}</label>
           <input type="password" id="login-password" name="password" autocomplete="off" placeholder="••••••••" required>
         </div>
         <button type="submit" class="btn btn-primary">{{ t.login.login }}</button>
+        <p class="login-error">{{ err or '' }}</p>
       </form>
     </div>
 
@@ -83,13 +75,14 @@
         <form class="login-form" action="/login" method="POST">
           <div class="field">
             <label for="m-login-email">{{ t.login.email }}</label>
-            <input type="email" id="m-login-email" name="email" autocomplete="off" placeholder="{{ t.login.email_placeholder }}" required>
+            <input type="email" id="m-login-email" name="email" value="{{ email or '' }}" autocomplete="off" placeholder="{{ t.login.email_placeholder }}" required>
           </div>
           <div class="field">
             <label for="m-login-password">{{ t.login.password }}</label>
             <input type="password" id="m-login-password" name="password" autocomplete="off" placeholder="••••••••" required>
           </div>
           <button type="submit" class="btn btn-primary">{{ t.login.login }}</button>
+          <p class="login-error">{{ err or '' }}</p>
         </form>
       </div>
  

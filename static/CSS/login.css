@@ -2,12 +2,6 @@
    LOGIN — desktop + mobile
    ════════════════════════════════ */
 
-html, body {
-  margin: 0;
-  padding: 0;
-}
-
-
 .login-split, .mobile-login {
   /* Effet Glossy */
   /*background: rgba(255, 255, 255, 0.35);
@@ -24,8 +18,10 @@ html, body {
   border: 2px solid #3a2e1f;
   background: rgba(235, 220, 190, 0.94);
   box-shadow: 0 0 0 4px rgba(180, 140, 70, 0.3), 0 8px 32px rgba(0,0,0,0.6);
-  opacity: 0;
-  animation: fadeIn 0.8s ease 1s forwards;
+  /*opacity: 0;*/
+
+  /*Incompatible avec le système de message d'erreur qui re-render le template de login*/
+  /*animation: fadeIn 0.8s ease 1s forwards;*/ 
 }
 
 @keyframes fadeIn {
@@ -77,6 +73,14 @@ html, body {
   background: linear-gradient(to bottom, transparent, #b4863a, transparent);
   margin: 3rem 0;
   flex-shrink: 0;
+}
+
+.login-error {
+  color: #8b1a1a;
+  font-size: 13px;
+  margin: 0.75rem 0 0;
+  text-align: center;
+  min-height: 1.2em; /* réserve la place même vide */
 }
 
 /* ── Mobile : caché par défaut ── */

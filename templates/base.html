@@ -10,7 +10,20 @@
 		{% block head %}
 		{% endblock %}
 		<link rel="stylesheet" href="{{ url_for('static', filename='CSS/style.css')}}">
-		<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+		<style>
+		    body {
+		        background-image: url("{{ url_for('static', filename='Assets/wallpaper.png') }}");
+		        background-size: cover;
+		        background-position: center;
+		        background-repeat: no-repeat;
+		        background-attachment: fixed;
+		    }
+		    @media (max-width: 600px) {
+		        body {
+		            background-image: url("{{ url_for('static', filename='Assets/wallpaper_mobile.png') }}");
+		        }
+		    }
+		</style>
 	</head>
 	<body>
 		<header>

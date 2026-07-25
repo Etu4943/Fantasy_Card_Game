@@ -59,13 +59,13 @@ def login():
 		user = db.execute("SELECT id, username, hash FROM users WHERE email = ?", (email,)).fetchone()
 
 		if user == None :
-			return render_template("error.html", err="Cet utilisateur n'existe pas.")
+			return render_template("login.html", email=email, err="Cet utilisateur n'existe pas.")
 		elif not check_password_hash(user[2], password) :
-			return render_template("error.html", err="Mauvais mot de passe.")
+			return render_template("login.html", email=email, err="Mauvais mot de passe.")
 		else :
 			session["user_id"] = user[0]
 			session["username"] = user[1]
-		return redirect("/")
+		return redirect("/join")
 
 @app.route("/register", methods=["POST"])
 def register():
