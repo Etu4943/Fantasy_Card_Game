@@ -44,5 +44,11 @@
 		"subtitle" : "Modify my profile",
 		"change_avatar" : "Change avatar",
 		"save" : "Save"
+	},
+
+	"scoreboard" : {
+		"title" : "scoreboard",
+		"even" : "Even",
+		"empty" : "Not any party played until now."
 	}
 } 

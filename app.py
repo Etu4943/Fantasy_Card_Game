@@ -13,6 +13,17 @@ from state import game_state as GS
 from random import randint
 
 from functools import wraps
+from database import db, cursor
+# CREATE TABLE scoreboard (
+# 	id INTEGER PRIMARY KEY AUTOINCREMENT,
+# 	winner_id INTEGER NOT NULL,
+# 	winner_score INTEGER NOT NULL,
+# 	loser_id INTEGER NOT NULL,
+# 	loser_score INTEGER NOT NULL,
+# 	timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+# 	FOREIGN KEY (winner_id) REFERENCES users(id),
+# 	FOREIGN KEY (loser_id) REFERENCES users(id)
+# );
 
 
 
@@ -22,8 +33,8 @@ app.config['BABEL_DEFAULT_LOCALE'] = 'fr'
 AVAILABLE_LANGUAGES = ["fr", "en"]
 socketio.init_app(app)
 
-db = sqlite3.connect("fantasy.db", check_same_thread=False)
-cursor = db.cursor()
+# db = sqlite3.connect("fantasy.db", check_same_thread=False)
+# cursor = db.cursor()
 
 
 NB_LETTERS_ROOM_SEQUENCE = 5
@@ -224,6 +235,27 @@ def upload_avatar():
         flash("Format de fichier non autorisé")
     session['avatar'] = filename
     return redirect("/profile")
+
+@app.route("/scoreboard", methods=["GET"])
+@login_required
+def scoreboard():
+	r = db.execute("SELECT winner_score, w.username AS winner_username, w.avatar AS winner_avatar, loser_score, l.username AS loser_username, l.avatar AS loser_avatar, timestamp, is_even FROM scoreboard JOIN users AS w ON  scoreboard.winner_id = w.id JOIN users AS l ON scoreboard.loser_id = l.id;").fetchall()
+
+	scores = []
+
+	for q in r :
+		score = dict()
+		score["winner_score"] = q[0]
+		score["winner_username"] = q[1]
+		score["winner_avatar"] = q[2]
+		score["loser_score"] = q[3]
+		score["loser_username"] = q[4]
+		score["loser_avatar"] = q[5]
+		score["is_even"] = q[6] == 1
+		score["timestamp"] = q[7]
+		scores.append(score)
+
+	return render_template("scoreboard.html", scores=scores)
 
 if __name__ == "__main__" :
 	socketio.run(app)

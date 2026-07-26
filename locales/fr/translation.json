@@ -44,5 +44,11 @@
 		"subtitle" : "Modifier mon profil",
 		"change_avatar" : "Changer mon avatar",
 		"save" : "Sauver"
+	},
+
+	"scoreboard" : {
+		"title" : "Tableau des scores",
+		"even" : "Egalité",
+		"empty" : "Aucune partie jouée."
 	}
 } 

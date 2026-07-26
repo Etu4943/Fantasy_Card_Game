@@ -12,6 +12,7 @@ from card import Card
 from itertools import cycle
 import threading
 import random
+from database import update_scoreboard
 
 # user_id -> Timer en cours (déconnexion en attente)
 _pending_disconnects: dict[str, threading.Timer] = {}
@@ -428,20 +429,27 @@ def refresh(room_code, user_id, rsid, toggle=False):
 def finish(room_code, user_id, opponent_id) :
     opponent_score = len(GS[room_code]["players"][opponent_id]["board"])
     user_score = len(GS[room_code]["players"][user_id]["board"])
-
+    is_even = False
     if user_score > opponent_score :
         winner_id = user_id
+        loser_id = opponent_id
         winner_score = user_score
         loser_score = opponent_score
+        emit("game_over", {"winner_id":winner_id, "winner_score":winner_score,"loser_score":loser_score, "is_even": is_even}, to=room_code)
     elif user_score < opponent_score :
         winner_id = opponent_id
+        loser_id = user_id
         winner_score = opponent_score
         loser_score = user_score
+        emit("game_over", {"winner_id":winner_id, "winner_score":winner_score,"loser_score":loser_score, "is_even": is_even}, to=room_code)
     else :
-        winner_id = None
+        winner_id = user_id # Doesn't matter, but needed in update_scoreboard
+        loser_id = opponent_id # Doesn't matter, but needed in update_scoreboard
+        is_even = True
         winner_score = 0
         loser_score = 0
-    emit("game_over", {"winner_id":winner_id, "winner_score":winner_score,"loser_score":loser_score, "is_even": winner_id==None}, to=room_code)
+        emit("game_over", {"winner_id":None, "winner_score":winner_score,"loser_score":loser_score, "is_even": is_even}, to=room_code)
+    update_scoreboard(winner_id, winner_score, loser_id, loser_score, is_even)
 @socketio.on("steal_card_from_board")
 def steal_card_from_board(data):
     card_id = data["card_id"]

@@ -1,0 +1,249 @@
+/* ════════════════════════════════
+   SCOREBOARD — même esprit que login.css / profile.css
+   ════════════════════════════════ */
+
+.scoreboard-page {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: calc(100vh - 60px);
+  padding: 2.5rem 1.5rem;
+  font-family: var(--font-body);
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.scoreboard-wrap {
+  width: 100%;
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.scoreboard-title {
+  font-family: var(--font-title);
+  font-size: 28px;
+  font-weight: 700;
+  color: #e8d9b5;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+  margin: 0 0 0.35rem;
+  letter-spacing: 0.02em;
+}
+
+.scoreboard-sub {
+  font-size: 14px;
+  color: #cbb98f;
+  margin: 0 0 2rem;
+  text-align: center;
+}
+
+.score-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ── Chaque ligne = un parchemin ── */
+.score-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+
+  padding: 0.9rem 1.25rem;
+  box-sizing: border-box;
+
+  border: 2px solid #3a2e1f;
+  background: rgba(235, 220, 190, 0.94);
+  border-radius: 4px;
+  box-shadow: 0 0 0 4px rgba(180, 140, 70, 0.25), 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+.score-row.is-even {
+  box-shadow: 0 0 0 4px rgba(140, 140, 140, 0.2), 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Un côté (vainqueur ou perdant) ── */
+.side {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0; /* permet la troncature du nom */
+}
+
+.side-loser {
+  flex-direction: row-reverse;
+}
+
+/* ── Avatar ── */
+.score-avatar {
+  position: relative;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 2px solid #b4863a;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+
+  background-color: #4a2c1a;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.score-avatar.dim {
+  border-color: rgba(80, 60, 30, 0.4);
+  filter: grayscale(35%);
+  opacity: 0.85;
+}
+
+.score-avatar-initial {
+  font-family: var(--font-title);
+  font-size: 15px;
+  color: #f0e6d2;
+  line-height: 1;
+  user-select: none;
+}
+
+.crown {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 15px;
+  color: #b4863a;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Nom : petit rectangle parchemin ── */
+.score-name {
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  font-size: 13px;
+  font-weight: 500;
+  color: #3a2e1f;
+
+  padding: 5px 10px;
+  border-radius: 4px;
+  border: 1px solid rgba(80, 60, 30, 0.3);
+  background: #e4d3ab;
+}
+
+/* ── Score : rectangle accentué ── */
+.score-value {
+  flex-shrink: 0;
+  font-family: var(--font-title);
+  font-size: 15px;
+  line-height: 1;
+  padding: 6px 11px;
+  border-radius: 4px;
+  border: 1px solid rgba(80, 60, 30, 0.35);
+}
+
+.win-value {
+  background: #4a2c1a;
+  color: #f0e6d2;
+  border-color: rgba(74, 44, 26, 0.6);
+}
+
+.lose-value {
+  background: #e4d3ab;
+  color: #6b5535;
+}
+
+.is-even .win-value,
+.is-even .lose-value {
+  background: #d8c9a3;
+  color: #4a3d24;
+}
+
+/* ── Milieu : séparateur + date ── */
+.score-middle {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0 0.5rem;
+}
+
+.score-divider {
+  color: #b4863a;
+  font-size: 13px;
+}
+
+.score-date {
+  font-size: 10px;
+  color: #7a6a48;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.score-tag {
+  margin-top: 1px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #6b5535;
+}
+
+.score-empty {
+  text-align: center;
+  color: #e8d9b5;
+  font-size: 14px;
+  padding: 2rem;
+}
+
+/* ════════════════════════════════
+   MOBILE
+   ════════════════════════════════ */
+@media (max-width: 600px) {
+  .score-row {
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 0.6rem;
+    padding: 0.85rem 1rem;
+  }
+
+  .side {
+    flex: 1 1 auto;
+    min-width: 40%;
+  }
+
+  .side-winner {
+    order: 1;
+  }
+
+  .score-middle {
+    order: 3;
+    flex: 1 1 100%;
+    flex-direction: row;
+    justify-content: center;
+    gap: 8px;
+    padding-top: 0.4rem;
+    border-top: 1px dashed rgba(80, 60, 30, 0.3);
+  }
+
+  .side-loser {
+    order: 2;
+    justify-content: flex-end;
+  }
+
+  .score-name {
+    font-size: 12px;
+    max-width: 90px;
+  }
+}
