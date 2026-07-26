@@ -188,3 +188,38 @@ html, body {
   color: #e8d9b5;
   letter-spacing: -0.01em;
 }
+
+/* Avatar navbar */
+.nav-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px solid #d4af37;
+  background-color: #3a2e1f;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.nav-avatar-initial {
+  font-family: var(--font-title);
+  font-size: 14px;
+  color: #e8d9b5;
+  line-height: 1;
+  user-select: none;
+}
+
+@media (max-width: 600px) {
+  .nav-avatar {
+    width: 28px;
+    height: 28px;
+  }
+
+  .nav-avatar-initial {
+    font-size: 12px;
+  }
+}

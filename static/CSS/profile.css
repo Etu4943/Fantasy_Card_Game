@@ -49,7 +49,9 @@
 .avatar-wrap {
   margin: 0 auto 1.5rem;
   display: flex;
+  align-items: center;
   justify-content: center;
+  gap: 10px;
 }
 
 .avatar-circle {
@@ -121,4 +123,32 @@
     max-width: 420px;
     padding: 2rem 1.5rem;
   }
+}
+
+/* ── Séparateur horizontal (équivalent du login-divider) ── */
+.profile-divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #b4863a, transparent);
+  margin: 1.75rem 0;
+}
+
+/* ── Bouton d'envoi de l'avatar ── */
+.btn-avatar {
+  margin-top: 0.75rem;
+  padding: 6px 16px;
+  border-radius: 7px;
+  border: 1px solid rgba(74, 44, 26, 0.3);
+  background: transparent;
+  color: #4a2c1a;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-avatar:hover {
+  background: rgba(74, 44, 26, 0.15);
+  border-color: rgba(74, 44, 26, 0.5);
 }

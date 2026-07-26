@@ -58,7 +58,7 @@ def login():
 		email = request.form.get("email")
 		password = request.form.get("password")
 
-		user = db.execute("SELECT id, username, hash FROM users WHERE email = ?", (email,)).fetchone()
+		user = db.execute("SELECT id, username, hash, avatar FROM users WHERE email = ?", (email,)).fetchone()
 
 		if user == None :
 			return render_template("login.html", email=email, err="Cet utilisateur n'existe pas.")
@@ -67,6 +67,7 @@ def login():
 		else :
 			session["user_id"] = user[0]
 			session["username"] = user[1]
+			session["avatar"] = user[3]
 		return redirect("/join")
 
 @app.route("/register", methods=["POST"])
@@ -202,6 +203,7 @@ def upload_avatar():
         db.commit()
     else :
         flash("Format de fichier non autorisé")
+    session['avatar'] = filename
     return redirect("/profile")
 
 if __name__ == "__main__" :

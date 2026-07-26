@@ -11,7 +11,7 @@ body::before {
     content: "";
     position: fixed;
     inset: 0;
-    background-image: url("../Assets/wallpaper.png");
+    background-image: url("../Assets/wallpaper.jpeg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -22,7 +22,7 @@ body::before {
 
 @media (max-width: 600px) {
     body::before {
-        background-image: url("../Assets/wallpaper_mobile.png");
+        background-image: url("../Assets/wallpaper_mobile.jpeg");
     }
 }
 

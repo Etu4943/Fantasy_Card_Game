@@ -19,9 +19,10 @@
 		{% block head %}
 		{% endblock %}
 		<link rel="stylesheet" href="{{ url_for('static', filename='CSS/style.css')}}">
+		<link rel="preload" as="image" href="{{ url_for('static', filename='Assets/wallpaper.jpeg') }}">
 		<style>
 		    body {
-		        background-image: url("{{ url_for('static', filename='Assets/wallpaper.png') }}");
+		        background-image: url("{{ url_for('static', filename='Assets/wallpaper.jpeg') }}");
 		        background-size: cover;
 		        background-position: center;
 		        background-repeat: no-repeat;
@@ -29,7 +30,7 @@
 		    }
 		    @media (max-width: 600px) {
 		        body {
-		            background-image: url("{{ url_for('static', filename='Assets/wallpaper_mobile.png') }}");
+		            background-image: url("{{ url_for('static', filename='Assets/wallpaper_mobile.jpeg') }}");
 		        }
 		    }
 		</style>
@@ -69,7 +70,11 @@
 				        </div>
 				    </div>
 			    	{% if session['user_id'] %}
-				    	<span class="nav-username">{{ session['username'] }}</span>
+			    		<div class="nav-avatar" {% if session.get('avatar') %}style="background-image: url('{{ url_for('static', filename='Assets/avatars/' + session['avatar']) }}');"{% endif %}>
+					        {% if not session.get('avatar') %}
+					            <span class="nav-avatar-initial">{{ (session['username'] or '?')[0] | upper }}</span>
+					        {% endif %}
+					    </div>			
 				    	<a href="/logout" class="nav-btn">{{ t.login.logout }}</a>
 				    {% else %}
 				    	<a href="/login" class="nav-btn">{{ t.login.login }}</a>
