@@ -56,6 +56,7 @@
 			      	<li><a id="quit-btn" href="#" class="nav-link">{{ t.base.quit }}</a></li>
 			      {% else %}
 			      	<li><a href="/join" class="nav-link {% if request.path == '/join' %}active{% endif %}">{{ t.base.join }}</a></li>
+			      	<li><a href="/rules" class="nav-link {% if request.path == '/rules' %}active{% endif %}">{{ t.base.rules }}</a></li>
 			      	<li><a href="/scoreboard" class="nav-link {% if request.path == '/scoreboard' %}active{% endif %}">{{ t.base.scoreboard }}</a></li>
 			      {% endif %}
 

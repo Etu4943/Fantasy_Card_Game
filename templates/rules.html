@@ -1,0 +1,200 @@
+
+<!-- This, with rules.css, is my idea but 95% given by claude AI. -->
+{% extends "base.html" %}
+
+{% block title %}
+	Rules
+{% endblock %}
+
+{% block head %}
+	<link rel="stylesheet" href="{{ url_for('static', filename='CSS/rules.css')}}">
+{% endblock %}
+
+{% block content %}
+<main class="rules-page">
+	<h2 class="rules-title">{{ t.rules.title if t.rules is defined else "Règles des cartes" }}</h2>
+	<p class="rules-sub">{{ t.rules.subtitle if t.rules is defined else "Faites défiler pour découvrir le pouvoir de chaque carte." }}</p>
+
+	<div class="rules-carousel">
+		<button class="rules-nav" id="rules-prev" aria-label="Carte précédente">&#10094;</button>
+
+		<div class="rules-viewport">
+			<div class="card-track" id="card-track"></div>
+		</div>
+
+		<button class="rules-nav" id="rules-next" aria-label="Carte suivante">&#10095;</button>
+	</div>
+
+	<div class="rules-dots" id="rules-dots"></div>
+
+	<div class="rule-parchment" id="rule-parchment">
+		<h3 class="rule-card-name" id="rule-card-name"></h3>
+		<p class="rule-card-text" id="rule-card-text"></p>
+	</div>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+	const CARD_BASE = "{{ url_for('static', filename='Assets/Cards/') }}";
+	const BACK_IMG  = "{{ url_for('static', filename='Assets/back_card.png') }}";
+
+	/*
+		Liste déduite des cartes spéciales présentes dans fsocket.py.
+		=> à compléter/corriger : ajoutez les cartes "normales" du deck
+		   et ajustez les textes si besoin, ce sont des règles reformulées
+		   à partir de la logique de jeu existante.
+	*/
+	const CARDS = [
+		{
+			name: "lutin",
+			title: "Lutin",
+			text: "Échange immédiatement votre main avec celle de votre adversaire."
+		},
+		{
+			name: "farfadet",
+			title: "Farfadet",
+			text: "Échange votre tableau (les cartes déjà jouées) avec celui de votre adversaire."
+		},
+		{
+			name: "gnome",
+			title: "Gnome",
+			text: "Piochez deux cartes supplémentaires dans la pioche."
+		},
+		{
+			name: "elfe",
+			title: "Elfe",
+			text: "Rejouez immédiatement, à condition qu'elle soit la seule carte présente sur votre tableau."
+		},
+		{
+			name: "dryade",
+			title: "Dryade",
+			text: "Volez une carte au choix dans le tableau de votre adversaire, s'il n'est pas vide."
+		},
+		{
+			name: "korrigan",
+			title: "Korrigan",
+			text: "Volez deux cartes, une à une, dans la main de votre adversaire."
+		},
+		{
+			name: "fee",
+			title: "Fée",
+			text: "Annule la dernière carte spéciale jouée (Lutin, Farfadet, Dryade ou Korrigan) et retourne son effet contre son lanceur."
+		}
+	];
+
+	const track      = document.getElementById('card-track');
+	const dotsWrap   = document.getElementById('rules-dots');
+	const parchment  = document.getElementById('rule-parchment');
+	const nameEl     = document.getElementById('rule-card-name');
+	const textEl     = document.getElementById('rule-card-text');
+	const prevBtn    = document.getElementById('rules-prev');
+	const nextBtn    = document.getElementById('rules-next');
+
+	let centerIndex = 0;
+	const SPACING = 175; // px entre le centre de deux cartes
+
+	// ── Construction du DOM des cartes ──
+	const slots = CARDS.map((card, i) => {
+		const slot = document.createElement('div');
+		slot.className = 'card-slot';
+
+		const inner = document.createElement('div');
+		inner.className = 'card-inner';
+
+		const face = document.createElement('div');
+		face.className = 'card-face';
+		face.style.backgroundImage = `url('${CARD_BASE}${card.name}.png')`;
+
+		const back = document.createElement('div');
+		back.className = 'card-back';
+		back.style.backgroundImage = `url('${BACK_IMG}')`;
+
+		inner.appendChild(face);
+		inner.appendChild(back);
+		slot.appendChild(inner);
+		track.appendChild(slot);
+
+		slot.addEventListener('click', () => goTo(i));
+
+		return slot;
+	});
+
+	// ── Construction des points de navigation ──
+	const dots = CARDS.map((card, i) => {
+		const dot = document.createElement('button');
+		dot.className = 'rules-dot';
+		dot.setAttribute('aria-label', card.title);
+		dot.addEventListener('click', () => goTo(i));
+		dotsWrap.appendChild(dot);
+		return dot;
+	});
+
+	function layout() {
+		slots.forEach((slot, i) => {
+			const rel = i - centerIndex;
+			const abs = Math.abs(rel);
+
+			let scale, opacity, z, gray;
+			if (abs === 0)      { scale = 1;    opacity = 1;    z = 10; gray = 0; }
+			else if (abs === 1) { scale = 0.62; opacity = 0.55; z = 5;  gray = 0.85; }
+			else if (abs === 2) { scale = 0.42; opacity = 0.25; z = 2;  gray = 1; }
+			else                { scale = 0.3;  opacity = 0;    z = 0;  gray = 1; }
+
+			slot.style.transform = `translate(-50%, -50%) translateX(${rel * SPACING}px) scale(${scale})`;
+			slot.style.opacity = opacity;
+			slot.style.zIndex = z;
+			slot.style.filter = `grayscale(${gray})`;
+			slot.classList.toggle('is-center', abs === 0);
+			slot.style.pointerEvents = abs > 2 ? 'none' : 'auto';
+
+			const inner = slot.querySelector('.card-inner');
+			inner.style.transform = abs === 0 ? 'rotateY(0deg)' : 'rotateY(180deg)';
+		});
+
+		dots.forEach((dot, i) => dot.classList.toggle('active', i === centerIndex));
+
+		updateParchment();
+	}
+
+	function updateParchment() {
+		parchment.classList.add('is-fading');
+		setTimeout(() => {
+			const card = CARDS[centerIndex];
+			nameEl.textContent = card.title;
+			textEl.textContent = card.text;
+			parchment.classList.remove('is-fading');
+		}, 200);
+	}
+
+	function goTo(index) {
+		centerIndex = (index + CARDS.length) % CARDS.length;
+		layout();
+	}
+
+	prevBtn.addEventListener('click', () => goTo(centerIndex - 1));
+	nextBtn.addEventListener('click', () => goTo(centerIndex + 1));
+
+	document.addEventListener('keydown', (e) => {
+		if (e.key === 'ArrowLeft')  goTo(centerIndex - 1);
+		if (e.key === 'ArrowRight') goTo(centerIndex + 1);
+	});
+
+	// ── Swipe tactile ──
+	let touchStartX = null;
+	const viewport = document.querySelector('.rules-viewport');
+	viewport.addEventListener('touchstart', (e) => {
+		touchStartX = e.touches[0].clientX;
+	}, { passive: true });
+	viewport.addEventListener('touchend', (e) => {
+		if (touchStartX === null) return;
+		const dx = e.changedTouches[0].clientX - touchStartX;
+		if (Math.abs(dx) > 40) {
+			goTo(centerIndex + (dx < 0 ? 1 : -1));
+		}
+		touchStartX = null;
+	});
+
+	layout();
+});
+</script>
+{% endblock %}

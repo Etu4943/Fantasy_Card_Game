@@ -11,4 +11,3 @@ def update_scoreboard(winner_id, winner_score, lorser_id, loser_score, is_even):
 	except sqlite3.Error as err :
 		db.rollback()
 		print(err)
-		

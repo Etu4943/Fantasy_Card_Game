@@ -257,5 +257,8 @@ def scoreboard():
 
 	return render_template("scoreboard.html", scores=scores)
 
+@app.route("/rules", methods=["GET"])
+def rules():
+	return render_template("rules.html")
 if __name__ == "__main__" :
 	socketio.run(app)

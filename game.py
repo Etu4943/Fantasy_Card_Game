@@ -13,7 +13,7 @@ CARDS = [
 	["farfadet", "Pouvoir 1"],
 	["dryade", "Pouvoir 2"],
 	["elfe", "Pouvoir 3"],
-	# Fee disabled until I found a better architecture 
+	# Fee disabled until I find a better architecture 
 	# Like I need to be able to play it while the opponent is playing
 	# ["fee", "Pouvoir 4"],
 	["gnome", "Pouvoir 5"],

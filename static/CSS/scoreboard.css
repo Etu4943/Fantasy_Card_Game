@@ -16,27 +16,33 @@
   background-repeat: no-repeat;
 }
 
+/* Fond parchemin commun avec .login-split / .profile-card */
 .scoreboard-wrap {
   width: 100%;
   max-width: 760px;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 2.5rem 2.5rem 2rem;
+
+  border: 2px solid #3a2e1f;
+  background: rgba(235, 220, 190, 0.94);
+  box-shadow: 0 0 0 4px rgba(180, 140, 70, 0.3), 0 8px 32px rgba(0, 0, 0, 0.6);
 }
 
 .scoreboard-title {
   font-family: var(--font-title);
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 700;
-  color: #e8d9b5;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+  color: #3a2e1f;
   margin: 0 0 0.35rem;
   letter-spacing: 0.02em;
 }
 
 .scoreboard-sub {
   font-size: 14px;
-  color: #cbb98f;
+  color: #7a6a48;
   margin: 0 0 2rem;
   text-align: center;
 }
@@ -48,7 +54,7 @@
   gap: 1rem;
 }
 
-/* ── Chaque ligne = un parchemin ── */
+/* ── Chaque ligne ressort du parchemin du wrap ── */
 .score-row {
   display: flex;
   align-items: center;
@@ -58,14 +64,15 @@
   padding: 0.9rem 1.25rem;
   box-sizing: border-box;
 
-  border: 2px solid #3a2e1f;
-  background: rgba(235, 220, 190, 0.94);
-  border-radius: 4px;
-  box-shadow: 0 0 0 4px rgba(180, 140, 70, 0.25), 0 6px 20px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(80, 60, 30, 0.4);
+  background: #e4d3ab;
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(58, 46, 31, 0.35), inset 0 0 0 1px rgba(255, 248, 230, 0.4);
 }
 
 .score-row.is-even {
-  box-shadow: 0 0 0 4px rgba(140, 140, 140, 0.2), 0 6px 20px rgba(0, 0, 0, 0.5);
+  background: #d8c9a3;
+  box-shadow: 0 4px 10px rgba(58, 46, 31, 0.25), inset 0 0 0 1px rgba(255, 248, 230, 0.35);
 }
 
 /* ── Un côté (vainqueur ou perdant) ── */
@@ -76,9 +83,7 @@
   min-width: 0; /* permet la troncature du nom */
 }
 
-.side-loser {
-  flex-direction: row-reverse;
-}
+
 
 /* ── Avatar ── */
 .score-avatar {
@@ -139,7 +144,7 @@
   padding: 5px 10px;
   border-radius: 4px;
   border: 1px solid rgba(80, 60, 30, 0.3);
-  background: #e4d3ab;
+  background: #f0e6d2;
 }
 
 /* ── Score : rectangle accentué ── */
@@ -160,13 +165,13 @@
 }
 
 .lose-value {
-  background: #e4d3ab;
+  background: #f0e6d2;
   color: #6b5535;
 }
 
 .is-even .win-value,
 .is-even .lose-value {
-  background: #d8c9a3;
+  background: #f0e6d2;
   color: #4a3d24;
 }
 
@@ -202,7 +207,7 @@
 
 .score-empty {
   text-align: center;
-  color: #e8d9b5;
+  color: #7a6a48;
   font-size: 14px;
   padding: 2rem;
 }

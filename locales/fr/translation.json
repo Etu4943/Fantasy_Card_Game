@@ -19,7 +19,8 @@
 		"refresh" : "Rafraichir",
 		"quit" : "Quitter",
 		"scoreboard" : "Tableau des scores",
-		"profile" : "Mon profil"
+		"profile" : "Mon profil",
+		"rules" : "Règles"
 	},
 
 	"room" : {
@@ -50,5 +51,9 @@
 		"title" : "Tableau des scores",
 		"even" : "Egalité",
 		"empty" : "Aucune partie jouée."
+	},
+
+	"rules" : {
+		"title" : "Règles du jeu"
 	}
 } 

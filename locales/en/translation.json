@@ -19,7 +19,8 @@
 		"refresh" : "Refresh",
 		"quit" : "Quit",
 		"scoreboard" : "Scoreboard",
-		"profile" : "My profile"
+		"profile" : "My profile",
+		"rules" : "Rules"
 	},
 
 	"room" : {
@@ -50,5 +51,9 @@
 		"title" : "scoreboard",
 		"even" : "Even",
 		"empty" : "Not any party played until now."
+	},
+
+	"rules" : {
+		"title" : "Game rules"
 	}
 } 
