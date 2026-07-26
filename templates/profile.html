@@ -15,9 +15,12 @@
 			}
 		</style>
 	{% endif %}
+
+
 {% endblock %}
 
 {% block content %}
+	{% set avatar_err = get_flashed_messages(category_filter=["avatar_err"]) | first %}
 	<main class="profile-page">
 		<div class="profile-card">
 
@@ -37,6 +40,7 @@
 					<button type="submit" class="btn-avatar">Envoyer</button>
 				</div>
 			</form>
+			<span class="avatar-err" >{{ avatar_err or ''}}</span>
 			<div class="profile-divider"></div>
 			<form class="login-form profile-form" action="/profile" method="POST" enctype="multipart/form-data">
 

@@ -176,11 +176,30 @@ def inject_translations():
 @app.route('/profile', methods=["POST", "GET"])
 @login_required
 def profile():
+	user_id = session.get("user_id")
 	if request.method == "GET" :
 		username, email, avatar = db.execute("SELECT username, email, avatar FROM users WHERE id = ?", (session.get("user_id"),)).fetchone()
 		return render_template("profile.html", username=username, email=email, avatar=avatar)
 	else :
-		pass
+		changed_something = False
+		username = request.form.get("username")
+		email = request.form.get("email")
+
+		user_info = db.execute("SELECT username, email FROM users WHERE id = ?", (user_id,)).fetchone()
+
+		if username != user_info[0] :
+			changed_something = True
+			db.execute("UPDATE users SET username = ? WHERE id = ?", (username, user_id))
+
+		if email != user_info[1] :
+			changed_something = True
+			db.execute("UPDATE users SET email = ? WHERE id = ?", (email, user_id))
+
+		if changed_something : 
+			db.commit()
+
+		return redirect("/profile")
+
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXT
@@ -193,7 +212,7 @@ def upload_avatar():
         return redirect("/profile")
     file = request.files["avatar"]
     if file.filename == "" :
-        flash("No selected file")
+        flash("No selected file", "avatar_err")
         return redirect("/profile")
     if file and allowed_file(file.filename):
         ext = file.filename.rsplit('.', 1)[1].lower()
