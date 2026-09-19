@@ -38,6 +38,7 @@ card_to_steal = dict()
 
 last_action = dict()
 
+game_state_old = dict()
 game_state = dict()
 """
 	{

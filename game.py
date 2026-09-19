@@ -15,7 +15,7 @@ CARDS = [
 	["elfe", "Pouvoir 3"],
 	# Fee disabled until I find a better architecture 
 	# Like I need to be able to play it while the opponent is playing
-	# ["fee", "Pouvoir 4"],
+	["fee", "Pouvoir 4"],
 	["gnome", "Pouvoir 5"],
 	["korrigan", "Pouvoir 6"],
 	["lutin", "Pouvoir 7"]

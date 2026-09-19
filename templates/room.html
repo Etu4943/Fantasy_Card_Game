@@ -11,6 +11,7 @@
 	<script>
 	    var socket = io();
 	    let can_steal = false; /*Not a big deal that is client-side, because it only manage the front-end highlight, not the backend*/
+	    let should_highlight_hand = false;
 	    const T = {{ t | tojson }}; /* Solution proposed by claude in order to deal with utf-8*/
 	    socket.on('connect', () => {
 	        socket.emit('join', { room_code: "{{ room_code }}" });
@@ -146,6 +147,7 @@
 		    }
 		});
 
+
 		socket.on('hand', (hand) => {
 			let hand_div = document.getElementById("player-hand");
 			hand_div.innerHTML = "";
@@ -155,7 +157,9 @@
 		    	new_node.style.backgroundImage = `url('/static/Assets/Cards/${card.name}.png')`;
 		    	new_node.id = card["id"];
 		    	hand_div.appendChild(new_node);
-
+		    	if (should_highlight_hand){
+		    		new_node.classList.add("highlighted")
+		    	}
 		    }
 		    	
 
@@ -199,6 +203,7 @@
 			e.target.classList.remove("highlighted");
 			socket.emit('draw_a_card')
 			hand.addEventListener('click', on_hand_click);
+			should_highlight_hand = true;
 		}
 
 		socket.on("set_round", (current_id) => {
@@ -235,6 +240,7 @@
 		    if (!card) return; // clic en dehors d'une carte, on ignore
 		    
 		    let card_id = card.id
+		    should_highlight_hand = false;
 		    socket.emit("play", {"card_id":card_id, "is_from_elfe":false});
 		}
 
@@ -274,6 +280,8 @@
 			}
 
 		}
+
+
 
 		function on_opponent_hand_click(e){
 			let card = e.target.closest('.card');

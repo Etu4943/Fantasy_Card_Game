@@ -1,6 +1,7 @@
 from extensions import socketio
 from state import ROOMS, sid_to_room, hand, deck, board, player_round, card_to_steal, last_action
 from state import game_state as GS
+from state import game_state_old as GSO
 
 from flask import request, session, redirect
 from flask_socketio import join_room, leave_room, send, SocketIO, emit
@@ -307,6 +308,8 @@ def highlight_opponent_board(rsid):
 
 def highlight_opponent_hand(rsid):
     emit("highlight_opponent_hand",to=rsid)
+# def highlight_fairies_for_opponent(rsid):
+#     emit("highlight_fairies",to=rsid)
 
 
 
@@ -332,6 +335,9 @@ def hand_play(data):
             diffuse_message({"user": "system", "message":"CAUGHT CHEATING !"})
             return
 
+    ###################################
+    # Ici il faudra handle le fait de jouer une fée durant le tour de l'autre
+    ###################################
     if GS[room_code]["current_player_id"] != user_id :
         # print(f"Current player : {ROOMS[room_code]["current_player_id"]}")
         print("Not your turn !")
@@ -346,6 +352,10 @@ def hand_play(data):
     if not data["is_from_elfe"] :
         GS[room_code]["players"][user_id]["hand"].remove(selected_card)
         GS[room_code]["players"][user_id]["board"].append(selected_card)
+        # GSO = GS.copy()
+        # print(GSO)
+
+
 
     match selected_card["name"] :
         case "lutin" :
@@ -371,25 +381,25 @@ def hand_play(data):
                 GS[room_code]["last_action"]["name"] = "dryade"
                 highlight_opponent_board(request.sid)
                 return
-        # case "fee" :
-        #     name = GS[room_code]["last_action"]["name"]
-        #     if name == "farfadet" :
-        #         board[room_code][user_id].remove(selected_card)
-        #         board[room_code][user_id], board[room_code][opponent_id] = board[room_code][opponent_id], board[room_code][user_id]
-        #         board[room_code][user_id].append(selected_card) # Because in real life, you "refuse" the action by putting this in your board
-        #     elif name == "lutin" :
-        #         hand[room_code][user_id], hand[room_code][opponent_id] = hand[room_code][opponent_id], hand[room_code][user_id]
-        #     elif name == "dryade" :
-        #         for card in last_action[room_code]["cards"] :
-        #             board[room_code][opponent_id].remove(card) 
-        #             board[room_code][user_id].append(card)
-        #     elif name == "korrigan" :
-        #         for card in last_action[room_code]["cards"] :
-        #             hand[room_code][opponent_id].remove(card)
-        #             hand[room_code][user_id].append(card)
-        #     GS[room_code]["last_action"] = dict()
-        #     GS[room_code]["last_action"]["name"] = []
-        #     GS[room_code]["last_action"]["name"] = []
+        case "fee" :
+            name = GS[room_code]["last_action"]["name"]
+            if name == "farfadet" :
+                GS[room_code]["players"][user_id]["board"].remove(selected_card)
+                GS[room_code]["players"][user_id]["board"], GS[room_code]["players"][opponent_id]["board"] = GS[room_code]["players"][opponent_id]["board"], GS[room_code]["players"][user_id]["board"]
+                GS[room_code]["players"][user_id]["board"].append(selected_card) # Because in real life, you "refuse" the action by putting this in your board
+            elif name == "lutin" :
+                GS[room_code]["players"][user_id]["hand"], GS[room_code]["players"][opponent_id]["hand"] = GS[room_code]["players"][opponent_id]["hand"], GS[room_code]["players"][user_id]["hand"]
+            elif name == "dryade" :
+                for card in GS[room_code]["last_action"]["cards"] :
+                    GS[room_code]["players"][opponent_id]["board"].remove(card)
+                    GS[room_code]["players"][user_id]["board"].append(card)
+            elif name == "korrigan" :
+                for card in GS[room_code]["last_action"]["cards"] :
+                    GS[room_code]["players"][opponent_id]["hand"].remove(card)
+                    GS[room_code]["players"][user_id]["hand"].append(card)
+            GS[room_code]["last_action"] = dict()
+            GS[room_code]["last_action"]["name"] = ""
+            GS[room_code]["last_action"]["cards"] = []
         case "korrigan" :
             GS[room_code]["last_action"]["name"]= "korrigan"
             if len(GS[room_code]["players"][opponent_id]["hand"]) > 0 :
