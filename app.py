@@ -8,12 +8,13 @@ import fsocket
 import json
 import os
 
-from state import ROOMS
+from state import ROOMS, CARDS
 from state import game_state as GS
 from random import randint
 
 from functools import wraps
 from database import db, cursor
+
 # CREATE TABLE scoreboard (
 # 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 # 	winner_id INTEGER NOT NULL,
@@ -259,6 +260,6 @@ def scoreboard():
 
 @app.route("/rules", methods=["GET"])
 def rules():
-	return render_template("rules.html")
+	return render_template("rules.html", CARDS=CARDS)
 if __name__ == "__main__" :
 	socketio.run(app)

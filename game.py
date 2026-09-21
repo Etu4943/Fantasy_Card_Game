@@ -1,4 +1,4 @@
-from state import hand, deck
+from state import hand, deck, CARDS
 from state import game_state as GS
 from extensions import socketio
 import fsocket
@@ -9,17 +9,7 @@ import uuid
 NB_PEOPLE = 3
 NB_CARD_BY_HAND = 7
 
-CARDS = [
-	["farfadet", "Pouvoir 1"],
-	["dryade", "Pouvoir 2"],
-	["elfe", "Pouvoir 3"],
-	# Fee disabled until I find a better architecture 
-	# Like I need to be able to play it while the opponent is playing
-	["fee", "Pouvoir 4"],
-	["gnome", "Pouvoir 5"],
-	["korrigan", "Pouvoir 6"],
-	["lutin", "Pouvoir 7"]
-]
+
 
 def init_hand(room_code, user_id): # 7 cartes de chaque !
 	for _ in range(NB_CARD_BY_HAND):

@@ -44,7 +44,8 @@
 		"title" : "My profile",
 		"subtitle" : "Modify my profile",
 		"change_avatar" : "Change avatar",
-		"save" : "Save"
+		"save" : "Save",
+		"send" : "Send"
 	},
 
 	"scoreboard" : {
@@ -55,5 +56,15 @@
 
 	"rules" : {
 		"title" : "Game rules"
+	},
+
+	"abilities" : {
+		"elfe" : "Use the ability of one of your cards that's already on your board again",
+		"farfadet" : "Swap your board with the enemy",
+		"fee" : "Cancel the effect of the last played card",
+		"gnome" : "Draw two cards from de deck",
+		"korrigan" : "Steal two card from the enemy's hand",
+		"lutin" : "Swap your hand with the enemy",
+		"dryade" : "Steal a card from the enemy's board and put it in yours"
 	}
 } 

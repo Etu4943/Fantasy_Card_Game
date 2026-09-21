@@ -44,7 +44,8 @@
 		"title" : "Mon profil",
 		"subtitle" : "Modifier mon profil",
 		"change_avatar" : "Changer mon avatar",
-		"save" : "Sauver"
+		"save" : "Sauver",
+		"send" : "Envoyer"
 	},
 
 	"scoreboard" : {
@@ -55,5 +56,15 @@
 
 	"rules" : {
 		"title" : "Règles du jeu"
+	},
+
+	"abilities" : {
+		"elfe" : "Utilisez à nouveau le pouvoir d'une de vos cartes déjà posées",
+		"farfadet" : "Echangez votre peuple avec celui de l'adversaire",
+		"fee" : "Annule le pouvoir d'une carte déjà jouée",
+		"gnome" : "Piochez deux cartes supplementaires",
+		"korrigan" : "Piochez deux cartes au hasard dans la main de l'adversaire",
+		"lutin" : "Echangez votre main avec celle de l'adversaire",
+		"dryade" : "Volez une carte déjà posée par un adversaire et ajoutez-là à votre peuple"
 	}
 } 
