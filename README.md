@@ -14,6 +14,8 @@ I do not own any intellectual property, rules, idea or assets from this game.
 #### Where to play :
 You can play this game anytime, at the latest version, here : https://fantasy.cpotier.be/
 
+The game is **translated** ! For now it's available in French and English. But as it's just a json file, it could be translated in any language :)
+
 #### Login
 First, there is a login / register section. This is related to a sql3 databse. For now, it's on the app folder. But I'll host it on a dedicated server.
 The passwords are hashed with the werkzeug security library.
@@ -31,6 +33,12 @@ First, you draw a card. Then you play one on your board and its ability is trigg
 (For example, you can't reactivate on of the card on your board if you have none)
 Then it's the enemy's turn.
 The game stops when a player doesn't have any card left and if the deck is empty. You win the game by having the most cards on your board.
+
+#### Screenshots
+<img width="1280" height="1400" alt="image" src="https://github.com/user-attachments/assets/c981d638-8df0-473b-a894-7a44528ee2f8" />
+<img width="1280" height="1400" alt="image" src="https://github.com/user-attachments/assets/f000e809-59af-422b-b717-e01714273fab" />
+
+
 
 
 #### What about AI ?
